@@ -111,11 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (preloader) {
       setTimeout(() => {
         preloader.classList.add('hidden');
-        setTimeout(() => preloader.remove(), 500);
-      }, 300);
+        setTimeout(() => preloader.remove(), 800);
+      }, 2000);
     }
   };
   window.addEventListener('load', hidePreloader);
-  // Фолбэк: если 'load' не сработал (например, медленная сеть), скрыть через 3 сек
   setTimeout(hidePreloader, 3000);
 });

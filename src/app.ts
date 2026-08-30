@@ -138,8 +138,8 @@ app.listen(PORT, () => {
         password: "admin123",
       });
     }
-    db.prepare("UPDATE users SET is_admin = 1, balance = 100000 WHERE id = ?").run(admin.id);
-    console.log(`👑 Админ готов: admin / admin123 (баланс $1000)`);
+    db.prepare("UPDATE users SET is_admin = 1, balance = 0, total_earned = 0 WHERE id = ?").run(admin.id);
+    console.log(`👑 Админ готов: admin / admin123`);
   } catch (e) {
     console.warn("⚠️ Не удалось создать админа:", e);
   }
@@ -164,9 +164,9 @@ app.listen(PORT, () => {
         contact: "@kemping_ads",
       });
     }
-    // Пополняем баланс на $1000 (100000 центов)
-    AdvertiserModel.deposit(adv.id, 100000);
-    console.log(`📢 Рекламодатель готов: advertiser / ads123456 (баланс $1000)`);
+    // Пополняем баланс на $100 (10000 центов) для тестов
+    AdvertiserModel.deposit(adv.id, 10000);
+    console.log(`📢 Рекламодатель готов: advertiser / ads123456 (баланс $100)`);
   } catch (e) {
     console.warn("⚠️ Не удалось создать рекламодателя:", e);
   }
