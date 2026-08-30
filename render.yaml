@@ -22,4 +22,4 @@ services:
       - key: REFERRAL_BONUS_PERCENT
         value: 10
       - key: MIN_WITHDRAWAL_USD
-        value: 5
+        value: 15
