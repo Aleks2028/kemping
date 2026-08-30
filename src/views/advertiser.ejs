@@ -9,6 +9,9 @@
     </div>
   </div>
 
+  <!-- VIP-баннеры -->
+  <div id="vip-banners" class="vip-banners-bar" style="display:none; margin-bottom: 24px;"></div>
+
   <div id="onboarding" class="onboarding" style="display:none;">
     <div class="onboarding-card">
       <h2>Станьте рекламодателем</h2>
@@ -48,6 +51,26 @@
       </div>
     </div>
 
+    <!-- Продвижение -->
+    <div class="promo-grid">
+      <a href="/advertiser/referrals" class="promo-card">
+        <div class="promo-icon">👥</div>
+        <div class="promo-content">
+          <h3>Купить рефералов</h3>
+          <p>Обычные и VIP-рефералы для вашего аккаунта</p>
+        </div>
+        <div class="promo-arrow">→</div>
+      </a>
+      <a href="/advertiser/vip" class="promo-card promo-card-vip">
+        <div class="promo-icon">👑</div>
+        <div class="promo-content">
+          <h3>VIP-реклама</h3>
+          <p>Баннеры, закрепления, бейджи и показы</p>
+        </div>
+        <div class="promo-arrow">→</div>
+      </a>
+    </div>
+
     <div class="section-header">
       <h2>Мои задания</h2>
       <a href="/advertiser/new-task" class="btn btn-primary btn-sm">➕ Новое задание</a>
@@ -83,6 +106,25 @@ async function load() {
   document.getElementById('adv-approved').textContent = s.approvedCompletions;
 
   loadTasks();
+  loadVipBanners();
+}
+
+async function loadVipBanners() {
+  const res = await fetch('/api/vip/banners');
+  const { banners } = await res.json();
+  if (banners.length === 0) return;
+  const bar = document.getElementById('vip-banners');
+  bar.style.display = 'flex';
+  bar.innerHTML = banners.map(b => `
+    <a href="${b.link}" target="_blank" class="vip-banner-mini" style="background:${b.color};">
+      <span>🏆 ${escapeHtml(b.title)}</span>
+    </a>
+  `).join('');
+}
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
 }
 
 async function loadTasks() {
@@ -168,6 +210,19 @@ load();
 .task-status-badge.finished { background: rgba(156,163,175,.2); color: #d1d5db; }
 .task-status-badge.pending_review { background: rgba(59,130,246,.2); color: #93c5fd; }
 .task-actions { display: flex; gap: 8px; margin-top: 12px; }
+.vip-banners-bar { display: flex; gap: 12px; overflow-x: auto; }
+.vip-banner-mini { flex-shrink: 0; padding: 10px 20px; border-radius: 999px; color: white; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,.2); transition: transform .2s; }
+.vip-banner-mini:hover { transform: scale(1.05); }
+.promo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+.promo-card { display: flex; align-items: center; gap: 16px; background: white; border: 2px solid rgba(168,85,247,.1); border-radius: var(--radius); padding: 24px; text-decoration: none; transition: all .3s; }
+.promo-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(168,85,247,.15); }
+.promo-card-vip { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: rgba(251,191,36,.4); }
+.promo-card-vip:hover { border-color: #f59e0b; box-shadow: 0 8px 24px rgba(251,191,36,.2); }
+.promo-icon { font-size: 40px; flex-shrink: 0; }
+.promo-content h3 { font-size: 18px; color: var(--text-bright); margin-bottom: 4px; }
+.promo-content p { font-size: 13px; color: var(--text-dim); }
+.promo-arrow { font-size: 24px; color: var(--text-dim); margin-left: auto; flex-shrink: 0; }
+@media (max-width: 600px) { .promo-grid { grid-template-columns: 1fr; } }
 </style>
 
 <%- include('partials/footer') %>

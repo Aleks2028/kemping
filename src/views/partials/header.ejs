@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" id="siteHeader">
     <div class="container">
       <a href="/" class="logo">
         <span class="logo-icon">💸</span>
@@ -22,11 +22,11 @@
           <% if (user.isAdmin) { %>
             <a href="/admin" class="nav-link nav-admin">⚙️ Админ</a>
           <% } %>
-          <span class="balance-pill">$<%= (user.balance / 100).toFixed(2) %></span>
+          <span class="balance-pill" style="background: linear-gradient(135deg, var(--gradient-primary)); color: white; padding: 6px 14px; border-radius: 100px; font-weight: 700; font-size: 14px;">$<%= (user.balance / 100).toFixed(2) %></span>
           <a href="#" onclick="logout(); return false;" class="nav-link">Выйти</a>
         <% } else { %>
           <a href="/login" class="nav-link">Войти</a>
-          <a href="/register" class="btn btn-primary btn-sm">Регистрация</a>
+          <a href="/register" class="btn btn-primary btn-sm btn-pulse">Регистрация</a>
         <% } %>
       </nav>
     </div>

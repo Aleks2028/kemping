@@ -108,11 +108,112 @@ CREATE TABLE IF NOT EXISTS referrals (
   FOREIGN KEY (referred_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS referral_packs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  referral_count INTEGER NOT NULL,
+  price_cents INTEGER NOT NULL,
+  is_vip INTEGER DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS referral_purchases (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  pack_id TEXT NOT NULL,
+  referrals_assigned INTEGER DEFAULT 0,
+  price_cents INTEGER NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (pack_id) REFERENCES referral_packs(id)
+);
+
+ALTER TABLE users ADD COLUMN is_vip INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN vip_expires_at INTEGER;
+
+CREATE TABLE IF NOT EXISTS vip_banners (
+  id TEXT PRIMARY KEY,
+  advertiser_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  text TEXT,
+  link TEXT NOT NULL,
+  color TEXT DEFAULT '#ec4899',
+  price_per_day_cents INTEGER NOT NULL,
+  days INTEGER NOT NULL,
+  start_date INTEGER NOT NULL,
+  end_date INTEGER NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
+);
+
+CREATE TABLE IF NOT EXISTS vip_task_pins (
+  id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL,
+  advertiser_id TEXT NOT NULL,
+  price_per_day_cents INTEGER NOT NULL,
+  days INTEGER NOT NULL,
+  start_date INTEGER NOT NULL,
+  end_date INTEGER NOT NULL,
+  status TEXT DEFAULT 'active',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (task_id) REFERENCES tasks(id),
+  FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
+);
+
+CREATE TABLE IF NOT EXISTS vip_badges (
+  id TEXT PRIMARY KEY,
+  advertiser_id TEXT NOT NULL UNIQUE,
+  price_per_month_cents INTEGER NOT NULL,
+  months INTEGER NOT NULL,
+  start_date INTEGER NOT NULL,
+  end_date INTEGER NOT NULL,
+  status TEXT DEFAULT 'active',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
+);
+
+CREATE TABLE IF NOT EXISTS banner_slots (
+  id TEXT PRIMARY KEY,
+  advertiser_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  link TEXT NOT NULL,
+  impressions_purchased INTEGER NOT NULL,
+  impressions_delivered INTEGER DEFAULT 0,
+  price_cents INTEGER NOT NULL,
+  status TEXT DEFAULT 'active',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_completions_user ON task_completions(user_id, status);
 CREATE INDEX IF NOT EXISTS idx_completions_task ON task_completions(task_id, status);
 CREATE INDEX IF NOT EXISTS idx_withdrawals_user ON withdrawals(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_telegram ON users(telegram_id);
+
+CREATE TABLE IF NOT EXISTS payment_orders (
+  id TEXT PRIMARY KEY,
+  advertiser_id TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  method TEXT NOT NULL,
+  extra TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
+);
+
+CREATE TABLE IF NOT EXISTS crypto_deposits (
+  tx_hash TEXT PRIMARY KEY,
+  advertiser_id TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  currency TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
+);
 `);
 
 export function closeDb() {

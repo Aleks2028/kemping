@@ -34,18 +34,23 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label>Награда за 1 выполнение (USD) *</label>
-          <input type="number" name="reward" min="0.10" step="0.01" value="0.20" required />
+          <label>Награда исполнителю (USD) *</label>
+          <input type="number" name="userReward" min="0.02" step="0.01" value="0.02" required />
+          <p class="hint">Сколько получит исполнитель за выполнение</p>
         </div>
         <div class="form-group">
           <label>Количество выполнений *</label>
-          <input type="number" name="totalSlots" min="1" value="10" required />
+          <input type="number" name="totalSlots" min="1" value="100" required />
         </div>
       </div>
 
       <div class="cost-preview">
-        <span>Итого к оплате:</span>
-        <strong id="total-cost">$0.00</strong>
+        <div>
+          <span>Исполнитель получит: <strong id="user-pays">$0.02</strong> × <span id="slots-display">100</span></span>
+          <br/>
+          <span class="hint">Стоимость 1 задания для вас: <strong id="adv-price">$0.06</strong></span>
+        </div>
+        <strong id="total-cost">$6.00</strong>
       </div>
 
       <div class="form-group">
@@ -70,14 +75,24 @@
 </div>
 
 <script>
-const rewardInput = document.querySelector('[name=reward]');
+const rewardInput = document.querySelector('[name=userReward]');
 const slotsInput = document.querySelector('[name=totalSlots]');
+// Комиссия платформы 70% — рекламодатель платит userReward / (1 - 0.7) = userReward / 0.3 ≈ 3.33x
+const FEE_PERCENT = 70;
 function updateCost() {
-  const cost = (parseFloat(rewardInput.value) || 0) * (parseInt(slotsInput.value) || 0);
-  document.getElementById('total-cost').textContent = '$' + cost.toFixed(2);
+  const userPay = parseFloat(rewardInput.value) || 0;
+  const slots = parseInt(slotsInput.value) || 0;
+  // advertiser_price = userReward * 100 / (100 - 70) = userReward * 3.33...
+  const advPrice = userPay * 100 / (100 - FEE_PERCENT);
+  const total = advPrice * slots;
+  document.getElementById('user-pays').textContent = '$' + userPay.toFixed(2);
+  document.getElementById('slots-display').textContent = slots;
+  document.getElementById('adv-price').textContent = '$' + advPrice.toFixed(2);
+  document.getElementById('total-cost').textContent = '$' + total.toFixed(2);
 }
 rewardInput.addEventListener('input', updateCost);
 slotsInput.addEventListener('input', updateCost);
+updateCost();
 
 document.getElementById('task-form').addEventListener('submit', async (e) => {
   e.preventDefault();

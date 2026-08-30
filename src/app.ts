@@ -9,6 +9,9 @@ import taskRoutes from "./routes/tasks";
 import withdrawRoutes from "./routes/withdraw";
 import adminRoutes from "./routes/admin";
 import advertiserRoutes from "./routes/advertiser";
+import referralPackRoutes from "./routes/referral-packs";
+import vipAdRoutes from "./routes/vip-ads";
+import paymentRoutes from "./routes/payments";
 import { seedDemoData } from "./scripts/seed";
 
 const app = express();
@@ -35,6 +38,9 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/advertiser", advertiserRoutes);
+app.use("/api/referral-packs", referralPackRoutes);
+app.use("/api/vip", vipAdRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // ── Page Routes ──────────────────────────────────────────────
 
@@ -107,6 +113,16 @@ app.get("/advertiser/deposit", authOptional, (req, res) => {
   res.render("advertiser-deposit", { title: "Пополнение баланса", user: req.user });
 });
 
+app.get("/advertiser/referrals", authOptional, (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  res.render("advertiser-referrals", { title: "Покупка рефералов", user: req.user });
+});
+
+app.get("/advertiser/vip", authOptional, (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  res.render("advertiser-vip", { title: "VIP-реклама", user: req.user });
+});
+
 // ── Error handler ─────────────────────────────────────────────
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
@@ -115,6 +131,14 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 
 app.listen(PORT, () => {
   console.log(`🚀 Kemping запущен на http://localhost:${PORT}`);
+
+  // Периодическая проверка крипто-депозитов (USDT TRC20, BTC, ETH)
+  const { checkUsdtDeposits, checkCryptoDeposits } = require("./services/payment");
+  setInterval(async () => {
+    await checkUsdtDeposits();
+    await checkCryptoDeposits();
+  }, 60000); // каждую минуту
+  console.log(`💰 Периодическая проверка крипто-депозитов запущена (каждые 60с)`);
   // Сидируем демо-данные, если база пустая
   try {
     const result = seedDemoData();

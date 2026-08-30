@@ -31,7 +31,7 @@
     <div class="preloader-text">Загружаем для вас лучшие задания…</div>
   </div>
 
-  <header class="site-header">
+  <header class="site-header" id="siteHeader">
     <div class="container">
       <a href="/" class="logo">
         <span class="logo-icon">💸</span>
@@ -39,7 +39,7 @@
       </a>
       <nav class="nav">
         <a href="/login" class="nav-link">Войти</a>
-        <a href="/register" class="btn btn-primary btn-sm">Регистрация</a>
+        <a href="/register" class="btn btn-primary btn-sm btn-pulse">Регистрация</a>
       </nav>
     </div>
   </header>
@@ -47,17 +47,38 @@
   <main class="main">
     <div class="container">
 
-<div class="banner banner-promo">
-  <div class="banner-icon">🎉</div>
-  <div class="banner-content">
-    <div class="banner-title">Регистрируйся бесплатно</div>
-    <div class="banner-text">Без вложений, без скрытых платежей. Начни зарабатывать прямо сейчас!</div>
+<!-- ── LIVE TICKER ──────────────────────────────── -->
+<div class="live-ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><strong>Maria_K</strong> только что заработала $0.02</span>
+    <span class="ticker-item"><strong>Dmitry_88</strong> вывел $5.50 на USDT</span>
+    <span class="ticker-item"><strong>Anna_Petrova</strong> заработала $0.02</span>
+    <span class="ticker-item"><strong>Ivan_2026</strong> вывел $7.20 на карту</span>
+    <span class="ticker-item"><strong>Olga_money</strong> заработала $0.05</span>
+    <span class="ticker-item"><strong>Sergey_BTC</strong> вывел $15.00 на ЮMoney</span>
+    <span class="ticker-item"><strong>Nataly_work</strong> заработала $0.02</span>
+    <span class="ticker-item"><strong>Alex_income</strong> заработала $0.03</span>
+    <span class="ticker-item"><strong>Maria_K</strong> только что заработала $0.02</span>
+    <span class="ticker-item"><strong>Dmitry_88</strong> вывел $5.50 на USDT</span>
+    <span class="ticker-item"><strong>Anna_Petrova</strong> заработала $0.02</span>
+    <span class="ticker-item"><strong>Ivan_2026</strong> вывел $7.20 на карту</span>
+    <span class="ticker-item"><strong>Olga_money</strong> заработала $0.05</span>
+    <span class="ticker-item"><strong>Sergey_BTC</strong> вывел $15.00 на ЮMoney</span>
+    <span class="ticker-item"><strong>Nataly_work</strong> заработала $0.02</span>
+    <span class="ticker-item"><strong>Alex_income</strong> заработала $0.03</span>
   </div>
-  <a href="/register" class="btn banner-cta">Начать →</a>
 </div>
 
 <!-- ── HERO ─────────────────────────────────────── -->
 <section class="hero">
+  <div class="money-rain">
+    <span class="money-drop" style="left: 10%; animation-delay: 0s;">💵</span>
+    <span class="money-drop" style="left: 25%; animation-delay: 1.2s;">💰</span>
+    <span class="money-drop" style="left: 40%; animation-delay: 2.4s;">💸</span>
+    <span class="money-drop" style="left: 55%; animation-delay: 0.6s;">💵</span>
+    <span class="money-drop" style="left: 70%; animation-delay: 1.8s;">💰</span>
+    <span class="money-drop" style="left: 85%; animation-delay: 3s;">💸</span>
+  </div>
   <div class="hero-content">
     <div class="hero-badge reveal-scale">🚀 Более 50 000 активных пользователей</div>
     <h1 class="hero-title">
@@ -66,10 +87,10 @@
     </h1>
     <p class="hero-subtitle">
       Подписки, лайки, регистрации — выполняй задания за деньги.
-      <strong style="color: #fbbf24;">Вывод от $5 на карту, крипту или ЮMoney.</strong>
+      <strong style="color: #fbbf24;">Вывод от $10 на карту, крипту или ЮMoney.</strong>
     </p>
     <div class="hero-cta">
-      <a href="/register" class="btn btn-primary btn-lg">🚀 Начать зарабатывать</a>
+      <a href="/register" class="btn btn-primary btn-lg btn-pulse">🚀 Начать зарабатывать</a>
       <a href="#how" class="btn btn-ghost btn-lg">Как это работает?</a>
     </div>
     <div class="hero-stats">
@@ -89,8 +110,33 @@
   </div>
 </section>
 
+<!-- ── TRUST BAR ──────────────────────────────── -->
+<div class="trust-bar">
+  <div class="trust-item">
+    <span class="trust-icon">🔒</span>
+    <span>SSL-шифрование</span>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">✅</span>
+    <span>Верификация аккаунтов</span>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">⚡</span>
+    <span>Мгновенные выплаты</span>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">🛡️</span>
+    <span>Безопасность данных</span>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">💬</span>
+    <span>Поддержка 24/7</span>
+  </div>
+</div>
+
 <!-- ── HOW IT WORKS ────────────────────────────── -->
 <section class="how" id="how">
+  <div class="steps-connector"></div>
   <h2 class="section-title reveal">Как это <span style="color: #f472b6;">работает</span></h2>
   <div class="how-grid">
     <div class="how-card">
@@ -109,7 +155,7 @@
       <span class="step">3</span>
       <div class="how-icon">💵</div>
       <h3>Получай деньги</h3>
-      <p>Мгновенное зачисление после проверки. Минимум $5 на вывод.</p>
+      <p>Мгновенное зачисление после проверки. Минимум $10 на вывод.</p>
     </div>
     <div class="how-card">
       <span class="step">4</span>
@@ -128,28 +174,99 @@
       <div class="why-check">📣</div>
       <div>
         <h4>Подписки</h4>
-        <p>Подписаться на Telegram-канал, YouTube, Instagram. Самое популярное — от $0.20.</p>
+        <p>Подписаться на Telegram-канал, YouTube, Instagram. Самое популярное — от $0.02.</p>
       </div>
     </div>
     <div class="why-item reveal-left">
       <div class="why-check">📝</div>
       <div>
         <h4>Регистрации</h4>
-        <p>Создать аккаунт на сайте или в приложении. Платим больше — от $0.50.</p>
+        <p>Создать аккаунт на сайте или в приложении. Платим больше — от $0.05.</p>
       </div>
     </div>
     <div class="why-item reveal-left">
       <div class="why-check">❤️</div>
       <div>
         <h4>Лайки и репосты</h4>
-        <p>Поставить лайк, написать комментарий или сделать репост. Быстро — от $0.15.</p>
+        <p>Поставить лайк, написать комментарий или сделать репост. Быстро — от $0.02.</p>
       </div>
     </div>
     <div class="why-item reveal-left">
       <div class="why-check">👁️</div>
       <div>
         <h4>Просмотры</h4>
-        <p>Посмотреть видео или статью до конца. Платят за ваше время — от $0.10.</p>
+        <p>Посмотреть видео или статью до конца. Платят за ваше время — от $0.02.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PAYMENT METHODS ────────────────────────── -->
+<section class="why" style="margin-top: 0;">
+  <h2 class="section-title reveal">Вывод <span style="color: #60a5fa;">денег</span></h2>
+  <div class="methods-grid">
+    <div class="method-card">
+      <div class="method-icon">💎</div>
+      <div class="method-name">USDT (TRC20)</div>
+      <div class="method-time">1–2 часа</div>
+      <div class="method-fee">Комиссия $1</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">💴</div>
+      <div class="method-name">ЮMoney</div>
+      <div class="method-time">1–2 часа</div>
+      <div class="method-fee">Комиссия $0.50</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">💳</div>
+      <div class="method-name">Банковская карта</div>
+      <div class="method-time">1–2 часа</div>
+      <div class="method-fee">Комиссия $2</div>
+    </div>
+  </div>
+  <div style="text-align: center; margin-top: 24px;">
+    <div class="countdown">
+      <span class="countdown-dot"></span>
+      Минимальная сумма вывода: <strong style="color: #f59e0b;">$10</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ───────────────────────────── -->
+<section class="why" style="margin-top: 0;">
+  <h2 class="section-title reveal">Отзывы <span style="color: #fbbf24;">пользователей</span></h2>
+  <div class="testimonials">
+    <div class="testimonial">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">«Вывожу деньги каждую неделю уже 3 месяца. Всё стабильно, никаких проблем. Зарабатываю на подписках и лайках, когда есть свободное время.»</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">МК</div>
+        <div>
+          <div class="testimonial-name">Мария К.</div>
+          <div class="testimonial-info">Заработала $84 за месяц</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">«Попробовала ради интереса — за первый день сделала 15 заданий и заработала $0.30. Не миллионы, но приятно. Теперь это моё хобби.»</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">АП</div>
+        <div>
+          <div class="testimonial-name">Анна П.</div>
+          <div class="testimonial-info">Вывела $12 на USDT</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">«Отличный сайт! Задания простые, модерация быстрая. Выводил и на карту, и на крипту — оба раза деньги пришли вовремя.»</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">ДМ</div>
+        <div>
+          <div class="testimonial-name">Дмитрий М.</div>
+          <div class="testimonial-info">Вывел $156 за всё время</div>
+        </div>
       </div>
     </div>
   </div>
@@ -194,7 +311,7 @@
 <section class="cta-section reveal">
   <h2>Готов начать зарабатывать?</h2>
   <p>Присоединяйся к 50 000+ исполнителей. Регистрация бесплатна.</p>
-  <a href="/register" class="btn btn-primary btn-lg">🚀 Создать аккаунт — бесплатно</a>
+  <a href="/register" class="btn btn-primary btn-lg btn-pulse">🚀 Создать аккаунт — бесплатно</a>
 </section>
 
 <!-- ── ADVERTISER CTA ─────────────────────────── -->
@@ -223,5 +340,44 @@
   </footer>
 
   <script src="/js/app.js"></script>
+  <script>
+    // Scroll-triggered header shadow
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('siteHeader');
+      if (window.scrollY > 20) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Animated counters
+    function animateCounter(el) {
+      const target = parseInt(el.dataset.target || el.querySelector('span')?.dataset.target || '0');
+      const span = el.querySelector('span') || el;
+      const duration = 2000;
+      const start = performance.now();
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(eased * target);
+        span.textContent = current.toLocaleString('ru-RU');
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+    document.querySelectorAll('.stat-value[data-target], .stat-value span[data-target]').forEach(el => {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCounter(el);
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.5 });
+      observer.observe(el);
+    });
+  </script>
 </body>
 </html>

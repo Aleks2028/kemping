@@ -52,21 +52,23 @@ router.get("/user/history", requireAuth, (req: Request, res: Response) => {
 
 // POST /tasks (только рекламодатели и админы)
 router.post("/", requireAdmin, (req: Request, res: Response) => {
-  const { title, description, type, url, reward, totalSlots, requiresProof, proofInstructions, expiresAt } = req.body;
+  const { title, description, type, url, userReward, totalSlots, requiresProof, proofInstructions, expiresAt } = req.body;
 
-  if (!title || !url || !reward || !totalSlots) {
+  if (!title || !url || !userReward || !totalSlots) {
     return res.status(400).json({ error: "Заполните обязательные поля" });
   }
 
-  if (reward < 10) { // минимум 10 центов
-    return res.status(400).json({ error: "Минимальная награда 10 центов" });
+  const userRewardCents = Math.round(Number(userReward) * 100);
+
+  if (userRewardCents < 2) { // минимум $0.02
+    return res.status(400).json({ error: "Минимальная награда исполнителю — $0.02" });
   }
 
   try {
     const task = TaskModel.create({
       advertiserId: req.user!.id,
       title, description, type: type ?? "custom",
-      url, reward: Number(reward), totalSlots: Number(totalSlots),
+      url, userReward: userRewardCents, reward: userRewardCents, totalSlots: Number(totalSlots),
       requiresProof: !!requiresProof, proofInstructions,
       expiresAt: expiresAt ? Number(expiresAt) : undefined,
     });

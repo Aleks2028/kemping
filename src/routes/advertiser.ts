@@ -86,20 +86,26 @@ router.post("/tasks", requireAuth, (req: Request, res: Response) => {
     return res.status(400).json({ error: "Вы не рекламодатель" });
   }
 
-  const { title, description, type, url, reward, totalSlots, requiresProof, proofInstructions, expiresAt } = req.body;
+  const { title, description, type, url, userReward, totalSlots, requiresProof, proofInstructions, expiresAt } = req.body;
 
-  if (!title || !url || !reward || !totalSlots) {
+  if (!title || !url || !userReward || !totalSlots) {
     return res.status(400).json({ error: "Заполните обязательные поля" });
   }
 
-  const rewardCents = Math.round(Number(reward) * 100);
+  const userRewardCents = Math.round(Number(userReward) * 100);
   const slots = Number(totalSlots);
 
-  if (rewardCents < 10) {
-    return res.status(400).json({ error: "Минимальная награда за задание — $0.10" });
+  if (userRewardCents < 2) {
+    return res.status(400).json({ error: "Минимальная награда исполнителю — $0.02" });
   }
 
-  const totalCost = rewardCents * slots;
+  // Комиссия платформы: рекламодатель платит userReward + fee, где fee = userReward * fee% / (1 - fee%)
+  // При 70% комиссии: userReward=2c → fee=4c, рекламодатель платит 6c
+  const { PLATFORM_FEE_PERCENT } = require("../config");
+  const platformFee = Math.floor(userRewardCents * PLATFORM_FEE_PERCENT / (100 - PLATFORM_FEE_PERCENT));
+  const advertiserPriceCents = userRewardCents + platformFee;
+  const totalCost = advertiserPriceCents * slots;
+
   if (advertiser.balance < totalCost) {
     return res.status(400).json({
       error: `Недостаточно баланса. Нужно $${(totalCost / 100).toFixed(2)}, доступно $${(advertiser.balance / 100).toFixed(2)}`,
@@ -113,7 +119,8 @@ router.post("/tasks", requireAuth, (req: Request, res: Response) => {
     description: description || "",
     type: type ?? "custom",
     url,
-    reward: rewardCents,
+    reward: advertiserPriceCents,
+    userReward: userRewardCents,
     totalSlots: slots,
     requiresProof: !!requiresProof,
     proofInstructions,

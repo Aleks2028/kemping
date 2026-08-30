@@ -63,7 +63,7 @@ export const AdvertiserModel = {
     `).run(amountCents, advertiserId);
   },
 
-  // Списание за создание задания
+  // Списание за создание задания или VIP-услуги
   chargeTask(advertiserId: string, costCents: number): void {
     const adv = this.getById(advertiserId);
     if (!adv) throw new Error("advertiser not found");
@@ -71,6 +71,11 @@ export const AdvertiserModel = {
     db.prepare(`
       UPDATE advertisers SET balance = balance - ?, total_spent = total_spent + ? WHERE id = ?
     `).run(costCents, costCents, advertiserId);
+  },
+
+  // То же что chargeTask, просто алиас для удобства
+  debitBalance(advertiserId: string, amountCents: number): void {
+    this.chargeTask(advertiserId, amountCents);
   },
 
   // Сколько стоит задание (budget)

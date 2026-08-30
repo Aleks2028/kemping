@@ -47,15 +47,23 @@ export const TaskModel = {
     description: string;
     type: TaskType;
     url: string;
-    reward: number;            // cents
+    reward: number;            // cents — advertiser price (backward compat)
+    userReward?: number;       // cents — user reward (NEW: if set, overrides computed)
     totalSlots: number;
     requiresProof: boolean;
     proofInstructions?: string;
     expiresAt?: number;
   }): Task {
     const id = uuidv4();
-    const platformFee = Math.floor(data.reward * PLATFORM_FEE_PERCENT / 100);
-    const userReward = data.reward - platformFee;
+    // NEW: userReward is the input; advertiser pays more (with platform fee)
+    // advertiser_price = userReward / (1 - fee%)
+    const userReward = data.userReward ?? (data.reward - Math.floor(data.reward * PLATFORM_FEE_PERCENT / 100));
+    const platformFee = data.userReward
+      ? Math.floor(data.userReward * PLATFORM_FEE_PERCENT / (100 - PLATFORM_FEE_PERCENT))
+      : Math.floor(data.reward * PLATFORM_FEE_PERCENT / 100);
+    const reward = data.userReward
+      ? userReward + platformFee
+      : data.reward;
     const now = Math.floor(Date.now() / 1000);
 
     db.prepare(`
@@ -67,7 +75,7 @@ export const TaskModel = {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?)
     `).run(
       id, data.advertiserId, data.title, data.description, data.type, data.url,
-      data.reward, userReward, platformFee, data.totalSlots, data.totalSlots,
+      reward, userReward, platformFee, data.totalSlots, data.totalSlots,
       data.requiresProof ? 1 : 0, data.proofInstructions ?? null,
       now, data.expiresAt ?? null
     );

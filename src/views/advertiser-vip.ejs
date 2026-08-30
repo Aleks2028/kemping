@@ -1,0 +1,207 @@
+<%- include('partials/header') %>
+
+<div class="vip-page">
+  <div class="page-header">
+    <h1>👑 VIP-реклама</h1>
+    <p class="subtitle">Максимум охвата: баннеры, закрепления, бейджи и показы</p>
+  </div>
+
+  <!-- VIP-баннер на главной -->
+  <section class="vip-section">
+    <div class="vip-section-header">
+      <div class="vip-section-icon" style="background: var(--gradient-primary);">🏆</div>
+      <div>
+        <h2>VIP-баннер на главной</h2>
+        <p>Крупный баннер в топовой ленте. Показывается 5 случайных баннеров одновременно.</p>
+      </div>
+    </div>
+    <form class="vip-form" id="bannerForm">
+      <div class="form-group">
+        <label>Заголовок *</label>
+        <input type="text" name="title" required placeholder="Например: CryptoNews — лучший канал" />
+      </div>
+      <div class="form-group">
+        <label>Описание</label>
+        <input type="text" name="text" placeholder="Краткое описание" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ссылка *</label>
+          <input type="url" name="link" required placeholder="https://t.me/channel" />
+        </div>
+        <div class="form-group">
+          <label>Цвет</label>
+          <input type="color" name="color" value="#ec4899" style="height: 50px;" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Цена за день ($)</label>
+          <input type="number" name="pricePerDay" min="0.5" step="0.1" value="2" required />
+        </div>
+        <div class="form-group">
+          <label>Кол-во дней *</label>
+          <input type="number" name="days" min="1" max="90" value="7" required />
+        </div>
+      </div>
+      <div class="cost-preview">
+        <span>Итого:</span>
+        <strong id="bannerTotal">$14.00</strong>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">🚀 Разместить VIP-баннер</button>
+    </form>
+  </section>
+
+  <!-- Закрепление задания -->
+  <section class="vip-section">
+    <div class="vip-section-header">
+      <div class="vip-section-icon" style="background: var(--gradient-gold);">📌</div>
+      <div>
+        <h2>Закрепить задание в топе</h2>
+        <p>Ваше задание будет первым в ленте у всех исполнителей.</p>
+      </div>
+    </div>
+    <form class="vip-form" id="pinForm">
+      <div class="form-group">
+        <label>ID задания *</label>
+        <input type="text" name="taskId" required placeholder="Скопируйте ID из списка заданий" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Цена за день ($)</label>
+          <input type="number" name="pricePerDay" min="0.2" step="0.1" value="0.5" required />
+        </div>
+        <div class="form-group">
+          <label>Кол-во дней *</label>
+          <input type="number" name="days" min="1" max="30" value="3" required />
+        </div>
+      </div>
+      <div class="cost-preview">
+        <span>Итого:</span>
+        <strong id="pinTotal">$1.50</strong>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">📌 Закрепить задание</button>
+    </form>
+  </section>
+
+  <!-- VIP-бейдж -->
+  <section class="vip-section">
+    <div class="vip-section-header">
+      <div class="vip-section-icon" style="background: var(--gradient-accent);">👑</div>
+      <div>
+        <h2>VIP-бейдж рекламодателя</h2>
+        <p>Золотая корона рядом с названием вашей компании. Поднимает доверие исполнителей.</p>
+      </div>
+    </div>
+    <form class="vip-form" id="badgeForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Цена за месяц ($)</label>
+          <input type="number" name="pricePerMonth" min="1" step="1" value="5" required />
+        </div>
+        <div class="form-group">
+          <label>Кол-во месяцев *</label>
+          <input type="number" name="months" min="1" max="12" value="1" required />
+        </div>
+      </div>
+      <div class="cost-preview">
+        <span>Итого:</span>
+        <strong id="badgeTotal">$5.00</strong>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">👑 Купить VIP-бейдж</button>
+    </form>
+  </section>
+
+  <!-- Показы баннера -->
+  <section class="vip-section">
+    <div class="vip-section-header">
+      <div class="vip-section-icon" style="background: var(--gradient-success);">👁️</div>
+      <div>
+        <h2>Баннер-показы (1000 показов)</h2>
+        <p>Ваш баннер показывается в случайных слотах по всему сайту. Оплата за 1000 показов.</p>
+      </div>
+    </div>
+    <form class="vip-form" id="impressionForm">
+      <div class="form-group">
+        <label>Название кампании *</label>
+        <input type="text" name="title" required placeholder="Например: Реклама Telegram-канала" />
+      </div>
+      <div class="form-group">
+        <label>Ссылка *</label>
+        <input type="url" name="link" required placeholder="https://t.me/channel" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Кол-во показов (тысяч) *</label>
+          <input type="number" name="impressions" min="1" max="100" value="10" required />
+        </div>
+        <div class="form-group">
+          <label>Цена за 1000 показов ($)</label>
+          <input type="number" name="pricePer1000" min="0.5" step="0.1" value="1" required />
+        </div>
+      </div>
+      <div class="cost-preview">
+        <span>Итого:</span>
+        <strong id="impressionTotal">$10.00</strong>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">👁️ Запустить кампанию</button>
+    </form>
+  </section>
+</div>
+
+<script>
+  // Калькуляторы стоимости
+  function calcTotal(formId, totalId, calcFn) {
+    const form = document.getElementById(formId);
+    const update = () => {
+      const data = Object.fromEntries(new FormData(form));
+      document.getElementById(totalId).textContent = '$' + calcFn(data).toFixed(2);
+    };
+    form.querySelectorAll('input').forEach(i => i.addEventListener('input', update));
+    update();
+  }
+  calcTotal('bannerForm', 'bannerTotal', d => (Number(d.pricePerDay)||0) * (Number(d.days)||0));
+  calcTotal('pinForm', 'pinTotal', d => (Number(d.pricePerDay)||0) * (Number(d.days)||0));
+  calcTotal('badgeForm', 'badgeTotal', d => (Number(d.pricePerMonth)||0) * (Number(d.months)||0));
+  calcTotal('impressionForm', 'impressionTotal', d => (Number(d.pricePer1000)||0) * (Number(d.impressions)||0));
+
+  async function submitVip(formId, endpoint, successMsg) {
+    const form = document.getElementById(formId);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      const res = await fetch('/api/vip/' + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        alert('✅ ' + successMsg);
+        location.reload();
+      } else {
+        alert('❌ ' + (json.error || 'Ошибка'));
+      }
+    });
+  }
+  submitVip('bannerForm', 'banner', 'VIP-баннер размещён!');
+  submitVip('pinForm', 'pin-task', 'Задание закреплено в топе!');
+  submitVip('badgeForm', 'badge', 'VIP-бейдж активирован!');
+  submitVip('impressionForm', 'impression', 'Кампания показов запущена!');
+</script>
+
+<style>
+.vip-page { padding: 32px 24px; max-width: 900px; margin: 0 auto; }
+.vip-section { background: white; border-radius: var(--radius); padding: 32px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.1); }
+.vip-section-header { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
+.vip-section-icon { width: 56px; height: 56px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; flex-shrink: 0; }
+.vip-section h2 { font-size: 22px; margin-bottom: 4px; color: var(--text-bright); }
+.vip-section p { color: var(--text-dim); font-size: 14px; }
+.vip-form { display: flex; flex-direction: column; gap: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cost-preview { background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.1)); border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius-sm); padding: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
+.cost-preview strong { color: var(--success); font-size: 24px; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<%- include('partials/footer') %>

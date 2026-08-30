@@ -2,27 +2,29 @@
 
 <div class="auth-container">
   <div class="auth-card">
-    <h1 class="auth-title">Вход</h1>
+    <h1 class="auth-title">С возвращением! 👋</h1>
     <p class="auth-subtitle">Войди в свой аккаунт, чтобы продолжить зарабатывать</p>
 
     <form id="login-form" class="auth-form">
       <div class="form-group">
         <label for="login">Email или логин</label>
-        <input type="text" id="login" name="login" required />
+        <input type="text" id="login" name="login" required placeholder="Введите email или логин" />
       </div>
 
       <div class="form-group">
         <label for="password">Пароль</label>
-        <input type="password" id="password" name="password" required />
+        <input type="password" id="password" name="password" required placeholder="Введите пароль" />
       </div>
 
       <div id="login-error" class="form-error" style="display:none;"></div>
 
-      <button type="submit" class="btn btn-primary btn-block">Войти</button>
+      <button type="submit" class="btn btn-primary btn-block btn-pulse" style="font-size: 16px; padding: 16px;">
+        🔐 Войти в аккаунт
+      </button>
     </form>
 
     <p class="auth-footer">
-      Нет аккаунта? <a href="/register">Зарегистрироваться</a>
+      Нет аккаунта? <a href="/register">Зарегистрироваться бесплатно →</a>
     </p>
   </div>
 </div>

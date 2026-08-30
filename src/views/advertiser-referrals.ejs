@@ -1,0 +1,139 @@
+<%- include('partials/header') %>
+
+<div class="referrals-page">
+  <div class="page-header">
+    <h1>👥 Покупка рефералов</h1>
+    <p class="subtitle">Привлекайте рефералов в свою команду и зарабатывайте на их активности</p>
+  </div>
+
+  <div class="info-banner">
+    <div class="info-banner-icon">💡</div>
+    <div>
+      <strong>Как это работает?</strong>
+      <p>Обычные рефералы — это виртуальные пользователи, которые приписываются к вам и приносят доход. VIP-рефералы — дают повышенный бонус и VIP-статус на 30 дней.</p>
+    </div>
+  </div>
+
+  <h2 style="margin: 32px 0 16px; color: var(--text-bright);">🟢 Обычные рефералы</h2>
+  <div class="packs-grid" id="regularPacks"></div>
+
+  <h2 style="margin: 40px 0 16px; color: var(--text-bright);">
+    <span style="background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⭐ VIP-рефералы и Премиум</span>
+  </h2>
+  <div class="packs-grid" id="vipPacks"></div>
+
+  <section class="my-purchases" style="margin-top: 40px;">
+    <h2 style="color: var(--text-bright);">📋 Мои покупки</h2>
+    <div id="purchases" class="purchases-list">Загружаем…</div>
+  </section>
+</div>
+
+<script>
+  async function loadPacks() {
+    const res = await fetch('/api/referral-packs');
+    const { packs } = await res.json();
+    const regular = packs.filter(p => !p.isVip);
+    const vip = packs.filter(p => p.isVip);
+
+    document.getElementById('regularPacks').innerHTML = regular.map(p => packCard(p, false)).join('');
+    document.getElementById('vipPacks').innerHTML = vip.map(p => packCard(p, true)).join('');
+  }
+
+  function packCard(p, isVip) {
+    const perRef = (p.price / p.count / 100).toFixed(2);
+    const savings = p.count >= 100 ? '🎁 Экономия' : '';
+    return `
+      <div class="pack-card ${isVip ? 'pack-vip' : ''}">
+        ${isVip ? '<div class="badge-hot">⭐ VIP</div>' : ''}
+        <h3>${p.name}</h3>
+        <div class="pack-count">${p.count} ${isVip ? 'VIP' : ''} рефералов</div>
+        <p class="pack-desc">${p.description}</p>
+        <div class="pack-price">$${(p.price / 100).toFixed(2)}</div>
+        <div class="pack-per">$${perRef} за реферала ${savings}</div>
+        <button class="btn btn-primary btn-block" onclick="buyPack('${p.id}')">
+          ${isVip ? '⭐ Купить VIP' : 'Купить'}
+        </button>
+      </div>
+    `;
+  }
+
+  async function buyPack(packId) {
+    if (!confirm('Купить этот пакет? Средства спишутся с баланса.')) return;
+    const res = await fetch('/api/referral-packs/purchase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ packId }),
+    });
+    const json = await res.json();
+    if (res.ok) {
+      alert('✅ ' + (json.vipUntil ? 'VIP-статус активирован на 30 дней! ' : '') + 'Пакет успешно куплен!');
+      loadPurchases();
+      setTimeout(() => location.reload(), 800);
+    } else {
+      alert('❌ ' + (json.error || 'Ошибка'));
+    }
+  }
+
+  async function loadPurchases() {
+    const res = await fetch('/api/referral-packs/my', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const { purchases } = await res.json();
+    const el = document.getElementById('purchases');
+    if (purchases.length === 0) {
+      el.innerHTML = '<p class="empty">Пока нет покупок.</p>';
+      return;
+    }
+    el.innerHTML = purchases.map(p => `
+      <div class="purchase-row">
+        <span>📦 ${p.pack_id}</span>
+        <span><strong>$${(p.price_cents / 100).toFixed(2)}</strong></span>
+        <span>${new Date(p.created_at * 1000).toLocaleString()}</span>
+        <span class="status status-${p.status}">${p.status === 'completed' ? '✅ Активно' : p.status}</span>
+      </div>
+    `).join('');
+  }
+
+  loadPacks();
+  loadPurchases();
+</script>
+
+<style>
+.referrals-page { padding: 32px 24px; max-width: 1200px; margin: 0 auto; }
+.info-banner { background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(168,85,247,0.08)); border: 1px solid rgba(59,130,246,0.2); border-radius: var(--radius); padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
+.info-banner-icon { font-size: 32px; flex-shrink: 0; }
+.info-banner p { margin-top: 4px; color: var(--text-dim); }
+.packs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.pack-card {
+  background: white;
+  border: 2px solid rgba(168,85,247,0.1);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(168,85,247,0.06);
+}
+.pack-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(168,85,247,0.18); border-color: var(--primary); }
+.pack-vip {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: rgba(251,191,36,0.4);
+}
+.pack-vip:hover { border-color: #f59e0b; box-shadow: 0 12px 32px rgba(251,191,36,0.25); }
+.pack-card h3 { font-size: 20px; margin-bottom: 8px; color: var(--text-bright); }
+.pack-count { font-size: 32px; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 12px 0; }
+.pack-vip .pack-count { background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.pack-desc { color: var(--text-dim); font-size: 14px; min-height: 40px; }
+.pack-price { font-size: 28px; font-weight: 900; color: var(--success); margin: 16px 0 4px; }
+.pack-per { font-size: 12px; color: var(--text-dim); margin-bottom: 16px; }
+.purchase-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; padding: 12px; background: white; border-radius: var(--radius-sm); margin-bottom: 8px; align-items: center; font-size: 14px; }
+.status { padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+.status-completed { background: rgba(16,185,129,0.15); color: var(--success); }
+.status-pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+.empty { text-align: center; color: var(--text-dim); padding: 24px; }
+</style>
+
+<%- include('partials/footer') %>

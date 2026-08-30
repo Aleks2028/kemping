@@ -3,78 +3,151 @@
 <div class="deposit-page">
   <div class="form-container">
     <h1>💰 Пополнение баланса</h1>
-    <p class="subtitle">Внесите средства для создания заданий. Минимальное пополнение — $1</p>
+    <p class="subtitle">Внесите средства для создания заданий и VIP-рекламы. Минимальное пополнение — $1</p>
 
     <div id="balance-info" class="balance-info">
       <div class="balance-label">Текущий баланс</div>
       <div class="balance-value" id="current-balance">Загрузка…</div>
     </div>
 
-    <form id="deposit-form" class="deposit-form">
-      <div class="form-group">
-        <label>Сумма пополнения (USD)</label>
-        <div class="amount-grid">
-          <button type="button" class="amount-btn" data-amount="5">$5</button>
-          <button type="button" class="amount-btn" data-amount="10">$10</button>
-          <button type="button" class="amount-btn" data-amount="25">$25</button>
-          <button type="button" class="amount-btn" data-amount="50">$50</button>
-          <button type="button" class="amount-btn" data-amount="100">$100</button>
-          <button type="button" class="amount-btn" data-amount="500">$500</button>
+    <!-- Шаг 1: выбор суммы и метода -->
+    <div id="step1">
+      <form id="deposit-form" class="deposit-form">
+        <div class="form-group">
+          <label>Сумма пополнения (USD)</label>
+          <div class="amount-grid">
+            <button type="button" class="amount-btn" data-amount="5">$5</button>
+            <button type="button" class="amount-btn" data-amount="10">$10</button>
+            <button type="button" class="amount-btn" data-amount="25">$25</button>
+            <button type="button" class="amount-btn" data-amount="50">$50</button>
+            <button type="button" class="amount-btn" data-amount="100">$100</button>
+            <button type="button" class="amount-btn" data-amount="500">$500</button>
+          </div>
+          <input type="number" name="amount" id="amount-input" min="1" step="1" placeholder="Введите сумму" required />
         </div>
-        <input type="number" name="amount" id="amount-input" min="1" step="1" placeholder="Введите сумму" required />
-      </div>
 
-      <div class="form-group">
-        <label>Способ оплаты</label>
-        <div class="payment-methods">
-          <label class="payment-method">
-            <input type="radio" name="paymentMethod" value="card" checked />
-            <div class="method-card">
-              <div class="method-icon">💳</div>
-              <div class="method-name">Банковская карта</div>
-              <div class="method-desc">Visa, Mastercard, МИР</div>
-            </div>
-          </label>
-          <label class="payment-method">
-            <input type="radio" name="paymentMethod" value="crypto" />
-            <div class="method-card">
-              <div class="method-icon">🪙</div>
-              <div class="method-name">Криптовалюта</div>
-              <div class="method-desc">USDT, BTC, ETH</div>
-            </div>
-          </label>
-          <label class="payment-method">
-            <input type="radio" name="paymentMethod" value="qiwi" />
-            <div class="method-card">
-              <div class="method-icon">📱</div>
-              <div class="method-name">QIWI / ЮMoney</div>
-              <div class="method-desc">Электронные кошельки</div>
-            </div>
-          </label>
+        <div class="form-group">
+          <label>Способ оплаты</label>
+          <div class="payment-methods">
+            <label class="payment-method">
+              <input type="radio" name="paymentMethod" value="card" checked />
+              <div class="method-card">
+                <div class="method-icon">💳</div>
+                <div class="method-name">Банковская карта</div>
+                <div class="method-desc">Visa, Mastercard, МИР</div>
+                <div class="method-badge">Мгновенно</div>
+              </div>
+            </label>
+            <label class="payment-method">
+              <input type="radio" name="paymentMethod" value="usdt_trc20" />
+              <div class="method-card">
+                <div class="method-icon">🪙</div>
+                <div class="method-name">USDT TRC20</div>
+                <div class="method-desc">Сеть Tron</div>
+                <div class="method-badge">1–5 мин</div>
+              </div>
+            </label>
+            <label class="payment-method">
+              <input type="radio" name="paymentMethod" value="btc" />
+              <div class="method-card">
+                <div class="method-icon">₿</div>
+                <div class="method-name">Bitcoin (BTC)</div>
+                <div class="method-desc">Сеть Bitcoin</div>
+                <div class="method-badge">10–30 мин</div>
+              </div>
+            </label>
+            <label class="payment-method">
+              <input type="radio" name="paymentMethod" value="eth" />
+              <div class="method-card">
+                <div class="method-icon">Ξ</div>
+                <div class="method-name">Ethereum (ETH)</div>
+                <div class="method-desc">Сеть ERC-20</div>
+                <div class="method-badge">5–15 мин</div>
+              </div>
+            </label>
+            <label class="payment-method">
+              <input type="radio" name="paymentMethod" value="yoomoney" />
+              <div class="method-card">
+                <div class="method-icon">💴</div>
+                <div class="method-name">ЮMoney</div>
+                <div class="method-desc">Электронные деньги</div>
+                <div class="method-badge">Мгновенно</div>
+              </div>
+            </label>
+          </div>
         </div>
-      </div>
 
-      <div class="form-note">
-        💡 Пополнения через банковскую карту зачисляются мгновенно. Криптовалюта — после 1 подтверждения сети.
-      </div>
+        <div class="form-actions">
+          <a href="/advertiser" class="btn btn-ghost">← Назад</a>
+          <button type="submit" class="btn btn-primary btn-lg" id="payBtn">💸 Оплатить</button>
+        </div>
+      </form>
+    </div>
 
-      <div class="form-actions">
-        <a href="/advertiser" class="btn btn-ghost">← Назад</a>
-        <button type="submit" class="btn btn-primary btn-lg">💸 Пополнить</button>
-      </div>
-    </form>
+    <!-- Шаг 2: оплата картой — редирект -->
+    <div id="step-card" style="display:none;" class="payment-step">
+      <div class="result-icon">🔄</div>
+      <h2>Перенаправляем на оплату…</h2>
+      <p>Откроется страница ЮKassa для ввода данных карты.</p>
+      <button class="btn btn-ghost" onclick="location.reload()">Отмена</button>
+    </div>
 
-    <div id="payment-result" style="display:none;" class="payment-result">
+    <!-- Шаг 2: крипта — данные для перевода -->
+    <div id="step-crypto" style="display:none;" class="payment-step">
+      <div class="crypto-info">
+        <h2 id="crypto-title">🪙 Оплата USDT (TRC20)</h2>
+        <p class="crypto-note">⚠️ Отправьте ровно указанную сумму на адрес ниже. Минимальная сумма — $1.</p>
+
+        <div class="crypto-amount-box">
+          <div class="crypto-amount-label">Сумма к оплате:</div>
+          <div class="crypto-amount-value" id="crypto-amount">—</div>
+        </div>
+
+        <div class="crypto-address-box">
+          <div class="crypto-address-label">Адрес кошелька (скопируйте):</div>
+          <div class="crypto-address" id="crypto-address">—</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyAddress()">📋 Скопировать</button>
+        </div>
+
+        <div class="crypto-memo-box" id="memo-box" style="display:none;">
+          <div class="crypto-address-label">Memo / Comment (обязательно!):</div>
+          <div class="crypto-address" id="crypto-memo" style="color: var(--primary);">—</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyMemo()">📋 Скопировать</button>
+        </div>
+
+        <div class="crypto-warning">
+          <p>⏳ После отправки средств нажмите кнопку ниже. Баланс зачислится автоматически после подтверждения сети.</p>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" onclick="checkCryptoPayment()">✅ Я отправил(а), проверить зачисление</button>
+        <a href="/advertiser" class="btn btn-ghost btn-block" style="margin-top:8px;">← Вернуться в кабинет</a>
+      </div>
+    </div>
+
+    <!-- Шаг 2: ЮMoney — ссылка на оплату -->
+    <div id="step-yoomoney" style="display:none;" class="payment-step">
+      <div class="result-icon">💴</div>
+      <h2>ЮMoney</h2>
+      <p>Нажмите кнопку ниже для оплаты через ЮMoney</p>
+      <a href="#" id="yoomoney-link" class="btn btn-primary btn-lg" target="_blank">💴 Оплатить через ЮMoney →</a>
+      <a href="/advertiser" class="btn btn-ghost btn-block" style="margin-top:8px;">← Вернуться в кабинет</a>
+    </div>
+
+    <!-- Шаг 3: результат -->
+    <div id="step-success" style="display:none;" class="payment-step">
       <div class="result-icon">✅</div>
-      <h2>Платёж инициирован</h2>
-      <p id="result-message"></p>
-      <p class="result-note">Если баланс не обновился автоматически, обновите страницу через минуту.</p>
-      <a href="/advertiser" class="btn btn-primary">Вернуться в кабинет</a>
+      <h2>Баланс пополнен!</h2>
+      <p id="success-message">Средства зачислены на ваш баланс.</p>
+      <a href="/advertiser" class="btn btn-primary btn-lg">Вернуться в кабинет</a>
     </div>
   </div>
 </div>
 
 <script>
+let currentOrderId = '';
+let currentMethod = '';
+let currentAmount = '';
+
 async function loadBalance() {
   const res = await fetch('/api/advertiser/me', {
     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
@@ -95,50 +168,133 @@ document.querySelectorAll('.amount-btn').forEach(btn => {
 document.getElementById('deposit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target));
-  const res = await fetch('/api/advertiser/deposit', {
+  if (!data.amount || Number(data.amount) < 1) {
+    alert('Минимальная сумма — $1');
+    return;
+  }
+  currentMethod = data.paymentMethod;
+  currentAmount = data.amount;
+
+  const res = await fetch('/api/payments/deposit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
     body: JSON.stringify(data),
   });
   const json = await res.json();
-  if (res.ok) {
-    document.getElementById('deposit-form').style.display = 'none';
-    document.getElementById('payment-result').style.display = 'block';
-    document.getElementById('result-message').textContent = json.message;
-    loadBalance();
-  } else {
+
+  if (!res.ok) {
     alert(json.error || 'Ошибка');
+    return;
+  }
+
+  currentOrderId = json.orderId;
+
+  if (currentMethod === 'card') {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step-card').style.display = 'block';
+    window.location.href = json.confirmationUrl;
+  } else if (currentMethod === 'usdt_trc20') {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step-crypto').style.display = 'block';
+    document.getElementById('crypto-title').textContent = '🪙 Оплата USDT (TRC20)';
+    document.getElementById('crypto-amount').textContent = json.amountUsdt + ' USDT';
+    document.getElementById('crypto-address').textContent = json.address;
+    window.cryptoAddress = json.address;
+    if (json.memo) {
+      document.getElementById('memo-box').style.display = 'block';
+      document.getElementById('crypto-memo').textContent = json.memo;
+      window.cryptoMemo = json.memo;
+    }
+  } else if (currentMethod === 'btc') {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step-crypto').style.display = 'block';
+    document.getElementById('crypto-title').textContent = '₿ Оплата Bitcoin (BTC)';
+    document.getElementById('crypto-amount').textContent = json.amountBtc + ' BTC';
+    document.getElementById('crypto-address').textContent = json.address;
+    document.getElementById('crypto-address').dataset.address = json.address;
+    window.cryptoAddress = json.address;
+    document.getElementById('memo-box').style.display = 'none';
+  } else if (currentMethod === 'eth') {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step-crypto').style.display = 'block';
+    document.getElementById('crypto-title').textContent = 'Ξ Оплата Ethereum (ETH)';
+    document.getElementById('crypto-amount').textContent = json.amountEth + ' ETH';
+    document.getElementById('crypto-address').textContent = json.address;
+    window.cryptoAddress = json.address;
+    document.getElementById('memo-box').style.display = 'none';
+  } else if (currentMethod === 'yoomoney') {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step-yoomoney').style.display = 'block';
+    document.getElementById('yoomoney-link').href = json.invoiceUrl;
   }
 });
+
+async function checkCryptoPayment() {
+  const res = await fetch('/api/payments/check/' + currentOrderId, {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  const json = await res.json();
+  if (json.status === 'confirmed') {
+    document.getElementById('step-crypto').style.display = 'none';
+    document.getElementById('step-success').style.display = 'block';
+    document.getElementById('success-message').textContent =
+      'Зачислено $' + (json.amount / 100).toFixed(2) + '. Можете создавать задания!';
+    loadBalance();
+  } else {
+    alert('Средства ещё не поступили. Проверьте отправку и подождите 1-2 минуты. Если отправляли на другой адрес — обратитесь в поддержку.');
+  }
+}
+
+function copyAddress() {
+  navigator.clipboard.writeText(window.cryptoAddress || '');
+  alert('Адрес скопирован!');
+}
+function copyMemo() {
+  navigator.clipboard.writeText(window.cryptoMemo || '');
+  alert('Memo скопирован!');
+}
 </script>
 
 <style>
 .deposit-page { display: flex; justify-content: center; padding: 40px 20px; }
-.form-container { width: 100%; max-width: 600px; }
+.form-container { width: 100%; max-width: 700px; }
 .form-container h1 { color: var(--text-bright); margin-bottom: 8px; }
 .subtitle { color: var(--text-dim); margin-bottom: 24px; }
-.balance-info { background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05)); border: 1px solid rgba(59,130,246,.3); border-radius: var(--radius); padding: 24px; text-align: center; margin-bottom: 24px; }
+.balance-info { background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(6,182,212,.1)); border: 1px solid rgba(16,185,129,.3); border-radius: var(--radius); padding: 24px; text-align: center; margin-bottom: 24px; }
 .balance-label { color: var(--text-dim); font-size: 13px; margin-bottom: 6px; }
-.balance-value { font-size: 36px; font-weight: 800; color: var(--primary); }
+.balance-value { font-size: 36px; font-weight: 800; color: var(--success); }
 .deposit-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column; gap: 20px; }
 .amount-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
 .amount-btn { padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; }
-.amount-btn:hover { border-color: var(--primary); color: var(--primary); }
-.payment-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.amount-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(59,130,246,.05); }
+.payment-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
 .payment-method { cursor: pointer; }
 .payment-method input { display: none; }
-.payment-method input:checked + .method-card { border-color: var(--primary); background: rgba(59,130,246,.1); }
-.method-card { padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: center; transition: all .2s; }
+.payment-method input:checked + .method-card { border-color: var(--primary); background: rgba(59,130,246,.1); box-shadow: 0 0 0 2px rgba(59,130,246,.3); }
+.method-card { padding: 16px 12px; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); text-align: center; transition: all .2s; }
 .method-icon { font-size: 28px; margin-bottom: 6px; }
-.method-name { font-weight: 600; color: var(--text-bright); font-size: 14px; }
+.method-name { font-weight: 700; color: var(--text-bright); font-size: 13px; }
 .method-desc { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
-.form-note { background: rgba(59,130,246,.05); border: 1px solid rgba(59,130,246,.15); border-radius: var(--radius-sm); padding: 12px; color: var(--text-dim); font-size: 13px; }
-.form-actions { display: flex; justify-content: space-between; align-items: center; }
-.payment-result { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.method-badge { margin-top: 6px; display: inline-block; padding: 2px 8px; background: rgba(16,185,129,.15); color: var(--success); border-radius: 100px; font-size: 11px; font-weight: 700; }
+.form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.payment-step { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .result-icon { font-size: 64px; }
-.payment-result h2 { color: var(--text-bright); }
-.payment-result p { color: var(--text-dim); }
-.result-note { font-size: 13px; }
+.payment-step h2 { color: var(--text-bright); font-size: 28px; }
+.payment-step p { color: var(--text-dim); max-width: 400px; }
+.crypto-info { width: 100%; display: flex; flex-direction: column; gap: 20px; }
+.crypto-note { color: #ef4444; font-size: 14px; text-align: center; }
+.crypto-amount-box { background: linear-gradient(135deg, rgba(59,130,246,.1), rgba(168,85,247,.1)); border: 2px solid rgba(59,130,246,.3); border-radius: var(--radius); padding: 24px; text-align: center; }
+.crypto-amount-label { color: var(--text-dim); font-size: 13px; margin-bottom: 8px; }
+.crypto-amount-value { font-size: 36px; font-weight: 900; color: var(--primary); }
+.crypto-address-box { background: rgba(168,85,247,.05); border: 1px solid rgba(168,85,247,.2); border-radius: var(--radius); padding: 20px; text-align: center; }
+.crypto-address-label { color: var(--text-dim); font-size: 13px; margin-bottom: 8px; }
+.crypto-address { font-family: monospace; font-size: 15px; color: var(--text-bright); word-break: break-all; margin-bottom: 8px; background: rgba(0,0,0,.05); padding: 12px; border-radius: var(--radius-sm); }
+.crypto-memo-box { background: rgba(236,72,153,.05); border: 1px solid rgba(236,72,153,.2); border-radius: var(--radius); padding: 20px; text-align: center; }
+.crypto-warning { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); border-radius: var(--radius-sm); padding: 12px; color: #f59e0b; font-size: 13px; }
+@media (max-width: 600px) {
+  .amount-grid { grid-template-columns: repeat(3, 1fr); }
+  .payment-methods { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 
 <%- include('partials/footer') %>

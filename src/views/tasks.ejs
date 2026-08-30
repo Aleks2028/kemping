@@ -23,7 +23,7 @@
   <div class="banner banner-bonus">
     <div class="banner-icon">⚡</div>
     <div class="banner-content">
-      <div class="banner-title">Вывод от $5</div>
+      <div class="banner-title">Вывод от $10</div>
       <div class="banner-text">Зарабатывай и выводи на карту, USDT или ЮMoney в течение 1–2 часов</div>
     </div>
   </div>
@@ -32,6 +32,29 @@
     <div class="loading">Загружаем задания…</div>
   </div>
 </div>
+
+<a href="/profile" class="fab" title="Мой профиль">💰</a>
+
+<script>
+  // Smooth scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  setTimeout(() => {
+    document.querySelectorAll('.task-card').forEach((card, i) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = `all 0.5s ease ${i * 0.05}s`;
+      observer.observe(card);
+    });
+  }, 100);
+</script>
 
 <script>
   async function loadTasks() {
@@ -50,8 +73,11 @@
       return;
     }
 
-    list.innerHTML = tasks.map(t => `
-      <div class="task-card" data-type="${t.type}">
+    list.innerHTML = tasks.map((t, i) => {
+      const isFeatured = t.userReward >= 10 || t.remainingSlots < t.totalSlots / 4;
+      return `
+      <div class="task-card ${isFeatured ? 'featured' : ''}" data-type="${t.type}">
+        ${isFeatured ? '<div class="badge-hot">🔥 ТОП</div>' : ''}
         <div class="task-header">
           <span class="task-type task-type-${t.type}">${getTypeLabel(t.type)}</span>
           <span class="task-reward">$${(t.userReward / 100).toFixed(2)}</span>
@@ -64,7 +90,7 @@
         </div>
         <button class="btn btn-primary btn-block" onclick="startTask('${t.id}')">Выполнить →</button>
       </div>
-    `).join('');
+    `}).join('');
   }
 
   function getTypeLabel(type) {
