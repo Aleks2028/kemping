@@ -1,0 +1,62 @@
+<%- include('partials/header') %>
+
+<div class="profile-page">
+  <h1>👤 Профиль</h1>
+
+  <div class="profile-grid">
+    <div class="profile-card balance-card">
+      <div class="card-label">Доступно к выводу</div>
+      <div class="card-value">$<%= (user.balance / 100).toFixed(2) %></div>
+      <a href="/withdraw" class="btn btn-primary btn-sm">Вывести</a>
+    </div>
+    <div class="profile-card">
+      <div class="card-label">Всего заработано</div>
+      <div class="card-value">$<%= (user.totalEarned / 100).toFixed(2) %></div>
+    </div>
+    <div class="profile-card">
+      <div class="card-label">Выведено</div>
+      <div class="card-value">$<%= (user.totalWithdrawn / 100).toFixed(2) %></div>
+    </div>
+  </div>
+
+  <section class="profile-section">
+    <h2>📜 Реферальная программа</h2>
+    <p>Приглашай друзей — получай <strong>10%</strong> от их заработка пожизненно.</p>
+    <div class="referral-link">
+      <code id="ref-link">https://www.kemping.ru/register?ref=<%= user.username %></code>
+      <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('ref-link').textContent)">📋 Скопировать</button>
+    </div>
+  </section>
+
+  <section class="profile-section">
+    <h2>📊 История выполненных заданий</h2>
+    <div id="completions">Загружаем…</div>
+  </section>
+</div>
+
+<script>
+  async function loadCompletions() {
+    const res = await fetch('/api/tasks/user/history', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const { completions } = await res.json();
+    const el = document.getElementById('completions');
+    if (completions.length === 0) {
+      el.innerHTML = '<p class="empty">Пока нет выполненных заданий. <a href="/tasks">Перейти к заданиям →</a></p>';
+      return;
+    }
+    el.innerHTML = completions.map(c => `
+      <div class="history-row">
+        <span class="status status-${c.status}">${statusLabel(c.status)}</span>
+        <span>$${(c.reward / 100).toFixed(2)}</span>
+        <span>${new Date(c.createdAt * 1000).toLocaleString()}</span>
+      </div>
+    `).join('');
+  }
+  function statusLabel(s) {
+    return { pending: '⏳ На проверке', approved: '✅ Одобрено', rejected: '❌ Отклонено' }[s] ?? s;
+  }
+  loadCompletions();
+</script>
+
+<%- include('partials/footer') %>

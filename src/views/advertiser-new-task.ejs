@@ -1,0 +1,114 @@
+<%- include('partials/header') %>
+
+<div class="new-task-page">
+  <div class="form-container">
+    <h1>➕ Новое задание</h1>
+    <p class="subtitle">Создайте задание для привлечения аудитории</p>
+
+    <form id="task-form" class="task-form">
+      <div class="form-group">
+        <label>Название задания *</label>
+        <input type="text" name="title" required placeholder="Подписаться на наш Telegram-канал" />
+      </div>
+
+      <div class="form-group">
+        <label>Описание</label>
+        <textarea name="description" rows="3" placeholder="Подробности задания (необязательно)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Тип задания *</label>
+        <select name="type" required>
+          <option value="subscribe">📣 Подписка (Telegram, YouTube, Instagram)</option>
+          <option value="register">📝 Регистрация</option>
+          <option value="like">❤️ Лайк / Репост</option>
+          <option value="view">👁️ Просмотр видео / статьи</option>
+          <option value="custom">⭐ Другое</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ссылка *</label>
+        <input type="url" name="url" required placeholder="https://t.me/channel_name" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Награда за 1 выполнение (USD) *</label>
+          <input type="number" name="reward" min="0.10" step="0.01" value="0.20" required />
+        </div>
+        <div class="form-group">
+          <label>Количество выполнений *</label>
+          <input type="number" name="totalSlots" min="1" value="10" required />
+        </div>
+      </div>
+
+      <div class="cost-preview">
+        <span>Итого к оплате:</span>
+        <strong id="total-cost">$0.00</strong>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="requiresProof" />
+          Требовать подтверждение выполнения
+        </label>
+        <p class="hint">Если включено, исполнители будут отправлять скриншот или ссылку для проверки</p>
+      </div>
+
+      <div class="form-group">
+        <label>Инструкции для подтверждения</label>
+        <input type="text" name="proofInstructions" placeholder="Пример: пришлите скриншот подписки" />
+      </div>
+
+      <div class="form-actions">
+        <a href="/advertiser" class="btn btn-ghost">← Назад</a>
+        <button type="submit" class="btn btn-primary btn-lg">💸 Создать задание</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const rewardInput = document.querySelector('[name=reward]');
+const slotsInput = document.querySelector('[name=totalSlots]');
+function updateCost() {
+  const cost = (parseFloat(rewardInput.value) || 0) * (parseInt(slotsInput.value) || 0);
+  document.getElementById('total-cost').textContent = '$' + cost.toFixed(2);
+}
+rewardInput.addEventListener('input', updateCost);
+slotsInput.addEventListener('input', updateCost);
+
+document.getElementById('task-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  data.requiresProof = !!data.requiresProof;
+  const res = await fetch('/api/advertiser/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (res.ok) {
+    alert(json.message || 'Задание создано!');
+    window.location.href = '/advertiser';
+  } else {
+    alert(json.error || 'Ошибка');
+  }
+});
+</script>
+
+<style>
+.new-task-page { display: flex; justify-content: center; padding: 40px 20px; }
+.form-container { width: 100%; max-width: 600px; }
+.form-container h1 { color: var(--text-bright); margin-bottom: 8px; }
+.subtitle { color: var(--text-dim); margin-bottom: 32px; }
+.task-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cost-preview { background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3); border-radius: var(--radius-sm); padding: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
+.cost-preview strong { color: var(--primary); font-size: 22px; }
+.hint { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+.form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+</style>
+
+<%- include('partials/footer') %>

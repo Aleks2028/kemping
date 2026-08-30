@@ -1,0 +1,109 @@
+<%- include('partials/header') %>
+
+<div class="withdraw-page">
+  <h1>💰 Вывод средств</h1>
+
+  <div class="balance-display">
+    <div class="balance-label">Доступно к выводу</div>
+    <div class="balance-amount">$<%= (user.balance / 100).toFixed(2) %></div>
+  </div>
+
+  <form id="withdraw-form" class="withdraw-form">
+    <div class="form-group">
+      <label>Способ вывода</label>
+      <div class="methods">
+        <label class="method">
+          <input type="radio" name="method" value="usdt_trc20" required />
+          <div class="method-card">
+            <div class="method-icon">💲</div>
+            <div class="method-name">USDT (TRC20)</div>
+            <div class="method-fee">Комиссия: $1.00</div>
+          </div>
+        </label>
+        <label class="method">
+          <input type="radio" name="method" value="yoomoney" />
+          <div class="method-card">
+            <div class="method-icon">💳</div>
+            <div class="method-name">ЮMoney</div>
+            <div class="method-fee">Комиссия: $0.50</div>
+          </div>
+        </label>
+        <label class="method">
+          <input type="radio" name="method" value="card" />
+          <div class="method-card">
+            <div class="method-icon">🏦</div>
+            <div class="method-name">Банковская карта</div>
+            <div class="method-fee">Комиссия: $2.00</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="amount">Сумма (USD)</label>
+      <input type="number" id="amount" name="amount" min="5" step="0.01" required />
+    </div>
+
+    <div class="form-group">
+      <label for="wallet">Кошелёк / номер карты</label>
+      <input type="text" id="wallet" name="wallet" required placeholder="T... или 4100..." />
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block">Заказать вывод</button>
+  </form>
+
+  <section class="withdraw-history">
+    <h2>📜 История выводов</h2>
+    <div id="withdrawals">Загружаем…</div>
+  </section>
+</div>
+
+<script>
+  document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const res = await fetch('/api/withdraw', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (res.ok) {
+      alert('Заявка создана! ID: ' + json.withdrawal.id);
+      loadHistory();
+    } else {
+      alert(json.error || 'Ошибка');
+    }
+  });
+
+  async function loadHistory() {
+    const res = await fetch('/api/withdraw/history', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const { withdrawals } = await res.json();
+    const el = document.getElementById('withdrawals');
+    if (withdrawals.length === 0) {
+      el.innerHTML = '<p class="empty">Пока нет выводов.</p>';
+      return;
+    }
+    el.innerHTML = withdrawals.map(w => `
+      <div class="history-row">
+        <span class="status status-${w.status}">${statusLabel(w.status)}</span>
+        <span>$${(w.amount / 100).toFixed(2)} → ${methodLabel(w.method)}</span>
+        <span>${new Date(w.createdAt * 1000).toLocaleString()}</span>
+      </div>
+    `).join('');
+  }
+  function statusLabel(s) {
+    return { pending: '⏳ Ожидание', approved: '⏳ В обработке', paid: '✅ Выплачено', rejected: '❌ Отклонено' }[s] ?? s;
+  }
+  function methodLabel(m) {
+    return { usdt_trc20: 'USDT', yoomoney: 'ЮMoney', card: 'Карта' }[m] ?? m;
+  }
+  loadHistory();
+</script>
+
+<%- include('partials/footer') %>

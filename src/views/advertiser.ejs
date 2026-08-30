@@ -1,0 +1,173 @@
+<%- include('partials/header') %>
+
+<div class="advertiser-page">
+  <div class="page-header">
+    <h1>📊 Кабинет рекламодателя</h1>
+    <div class="header-actions">
+      <a href="/advertiser/deposit" class="btn btn-primary">💰 Пополнить баланс</a>
+      <a href="/advertiser/new-task" class="btn btn-ghost">➕ Создать задание</a>
+    </div>
+  </div>
+
+  <div id="onboarding" class="onboarding" style="display:none;">
+    <div class="onboarding-card">
+      <h2>Станьте рекламодателем</h2>
+      <p>Создавайте задания и привлекайте реальную аудиторию. Подписки, регистрации, лайки — всё под вашим контролем.</p>
+      <form id="become-form">
+        <div class="form-group">
+          <label>Название компании / проекта</label>
+          <input type="text" name="companyName" required placeholder="Мой крутой проект" />
+        </div>
+        <div class="form-group">
+          <label>Контакт (email или Telegram)</label>
+          <input type="text" name="contact" required placeholder="@username или email@site.com" />
+        </div>
+        <button type="submit" class="btn btn-primary">Стать рекламодателем</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label-sm">Баланс</div>
+        <div class="stat-big" id="adv-balance">—</div>
+        <a href="/advertiser/deposit" class="btn btn-primary btn-sm">Пополнить</a>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label-sm">Всего потрачено</div>
+        <div class="stat-big" id="adv-spent">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label-sm">Активных заданий</div>
+        <div class="stat-big" id="adv-active">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label-sm">Выполнений одобрено</div>
+        <div class="stat-big" id="adv-approved">—</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>Мои задания</h2>
+      <a href="/advertiser/new-task" class="btn btn-primary btn-sm">➕ Новое задание</a>
+    </div>
+
+    <div id="my-tasks">
+      <div class="loading">Загружаем…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function load() {
+  const res = await fetch('/api/advertiser/me', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  const data = await res.json();
+
+  if (!data.isAdvertiser) {
+    document.getElementById('onboarding').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+
+  const a = data.advertiser;
+  const s = data.stats;
+  document.getElementById('adv-balance').textContent = '$' + (a.balance / 100).toFixed(2);
+  document.getElementById('adv-spent').textContent = '$' + (a.total_spent / 100).toFixed(2);
+  document.getElementById('adv-active').textContent = s.activeTasks;
+  document.getElementById('adv-approved').textContent = s.approvedCompletions;
+
+  loadTasks();
+}
+
+async function loadTasks() {
+  const res = await fetch('/api/advertiser/tasks', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  const { tasks } = await res.json();
+  const el = document.getElementById('my-tasks');
+
+  if (tasks.length === 0) {
+    el.innerHTML = '<p class="empty">У вас пока нет заданий. <a href="/advertiser/new-task">Создайте первое →</a></p>';
+    return;
+  }
+
+  el.innerHTML = tasks.map(t => `
+    <div class="task-card">
+      <div class="task-header">
+        <span class="task-type task-type-${t.type}">${getTypeLabel(t.type)}</span>
+        <span class="task-status-badge ${t.status}">${statusLabel(t.status)}</span>
+      </div>
+      <h3>${t.title}</h3>
+      <div class="task-meta">
+        <span>💰 Награда: <strong>$${(t.userReward / 100).toFixed(2)}</strong></span>
+        <span>👥 ${t.totalSlots - t.remainingSlots} / ${t.totalSlots} выполнено</span>
+        <span>Осталось: <strong>${t.remainingSlots}</strong></span>
+      </div>
+      <div class="task-actions">
+        ${t.status === 'active' ? `<button class="btn btn-ghost btn-sm" onclick="pauseTask('${t.id}')">⏸ Пауза</button>` : ''}
+        <a href="${t.url}" target="_blank" class="btn btn-ghost btn-sm">🔗 Ссылка</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getTypeLabel(type) {
+  return { subscribe:'Подписка', register:'Регистрация', like:'Лайк', view:'Просмотр', custom:'Задание' }[type] ?? 'Задание';
+}
+function statusLabel(s) {
+  return { active:'Активно', paused:'На паузе', finished:'Завершено', pending_review:'На модерации' }[s] ?? s;
+}
+async function pauseTask(id) {
+  await fetch('/api/advertiser/tasks/' + id + '/pause', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  loadTasks();
+}
+
+document.getElementById('become-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const res = await fetch('/api/advertiser/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (res.ok) {
+    load();
+  } else {
+    alert(json.error || 'Ошибка');
+  }
+});
+
+load();
+</script>
+
+<style>
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+.stat-label-sm { color: var(--text-dim); font-size: 13px; margin-bottom: 8px; }
+.stat-big { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 12px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.section-header h2 { color: var(--text-bright); }
+.onboarding-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; max-width: 500px; margin: 40px auto; }
+.onboarding-card h2 { color: var(--text-bright); margin-bottom: 12px; }
+.onboarding-card p { color: var(--text-dim); margin-bottom: 24px; }
+.onboarding-card .form-group { margin-bottom: 16px; }
+.task-status-badge { font-size: 12px; padding: 3px 8px; border-radius: 999px; font-weight: 600; }
+.task-status-badge.active { background: rgba(16,185,129,.2); color: #86efac; }
+.task-status-badge.paused { background: rgba(245,158,11,.2); color: #fcd34d; }
+.task-status-badge.finished { background: rgba(156,163,175,.2); color: #d1d5db; }
+.task-status-badge.pending_review { background: rgba(59,130,246,.2); color: #93c5fd; }
+.task-actions { display: flex; gap: 8px; margin-top: 12px; }
+</style>
+
+<%- include('partials/footer') %>

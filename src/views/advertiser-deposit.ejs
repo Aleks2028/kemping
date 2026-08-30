@@ -1,0 +1,144 @@
+<%- include('partials/header') %>
+
+<div class="deposit-page">
+  <div class="form-container">
+    <h1>💰 Пополнение баланса</h1>
+    <p class="subtitle">Внесите средства для создания заданий. Минимальное пополнение — $1</p>
+
+    <div id="balance-info" class="balance-info">
+      <div class="balance-label">Текущий баланс</div>
+      <div class="balance-value" id="current-balance">Загрузка…</div>
+    </div>
+
+    <form id="deposit-form" class="deposit-form">
+      <div class="form-group">
+        <label>Сумма пополнения (USD)</label>
+        <div class="amount-grid">
+          <button type="button" class="amount-btn" data-amount="5">$5</button>
+          <button type="button" class="amount-btn" data-amount="10">$10</button>
+          <button type="button" class="amount-btn" data-amount="25">$25</button>
+          <button type="button" class="amount-btn" data-amount="50">$50</button>
+          <button type="button" class="amount-btn" data-amount="100">$100</button>
+          <button type="button" class="amount-btn" data-amount="500">$500</button>
+        </div>
+        <input type="number" name="amount" id="amount-input" min="1" step="1" placeholder="Введите сумму" required />
+      </div>
+
+      <div class="form-group">
+        <label>Способ оплаты</label>
+        <div class="payment-methods">
+          <label class="payment-method">
+            <input type="radio" name="paymentMethod" value="card" checked />
+            <div class="method-card">
+              <div class="method-icon">💳</div>
+              <div class="method-name">Банковская карта</div>
+              <div class="method-desc">Visa, Mastercard, МИР</div>
+            </div>
+          </label>
+          <label class="payment-method">
+            <input type="radio" name="paymentMethod" value="crypto" />
+            <div class="method-card">
+              <div class="method-icon">🪙</div>
+              <div class="method-name">Криптовалюта</div>
+              <div class="method-desc">USDT, BTC, ETH</div>
+            </div>
+          </label>
+          <label class="payment-method">
+            <input type="radio" name="paymentMethod" value="qiwi" />
+            <div class="method-card">
+              <div class="method-icon">📱</div>
+              <div class="method-name">QIWI / ЮMoney</div>
+              <div class="method-desc">Электронные кошельки</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-note">
+        💡 Пополнения через банковскую карту зачисляются мгновенно. Криптовалюта — после 1 подтверждения сети.
+      </div>
+
+      <div class="form-actions">
+        <a href="/advertiser" class="btn btn-ghost">← Назад</a>
+        <button type="submit" class="btn btn-primary btn-lg">💸 Пополнить</button>
+      </div>
+    </form>
+
+    <div id="payment-result" style="display:none;" class="payment-result">
+      <div class="result-icon">✅</div>
+      <h2>Платёж инициирован</h2>
+      <p id="result-message"></p>
+      <p class="result-note">Если баланс не обновился автоматически, обновите страницу через минуту.</p>
+      <a href="/advertiser" class="btn btn-primary">Вернуться в кабинет</a>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadBalance() {
+  const res = await fetch('/api/advertiser/me', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  const data = await res.json();
+  if (data.isAdvertiser) {
+    document.getElementById('current-balance').textContent = '$' + (data.advertiser.balance / 100).toFixed(2);
+  }
+}
+loadBalance();
+
+document.querySelectorAll('.amount-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('amount-input').value = btn.dataset.amount;
+  });
+});
+
+document.getElementById('deposit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const res = await fetch('/api/advertiser/deposit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (res.ok) {
+    document.getElementById('deposit-form').style.display = 'none';
+    document.getElementById('payment-result').style.display = 'block';
+    document.getElementById('result-message').textContent = json.message;
+    loadBalance();
+  } else {
+    alert(json.error || 'Ошибка');
+  }
+});
+</script>
+
+<style>
+.deposit-page { display: flex; justify-content: center; padding: 40px 20px; }
+.form-container { width: 100%; max-width: 600px; }
+.form-container h1 { color: var(--text-bright); margin-bottom: 8px; }
+.subtitle { color: var(--text-dim); margin-bottom: 24px; }
+.balance-info { background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.05)); border: 1px solid rgba(59,130,246,.3); border-radius: var(--radius); padding: 24px; text-align: center; margin-bottom: 24px; }
+.balance-label { color: var(--text-dim); font-size: 13px; margin-bottom: 6px; }
+.balance-value { font-size: 36px; font-weight: 800; color: var(--primary); }
+.deposit-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+.amount-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
+.amount-btn { padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; }
+.amount-btn:hover { border-color: var(--primary); color: var(--primary); }
+.payment-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.payment-method { cursor: pointer; }
+.payment-method input { display: none; }
+.payment-method input:checked + .method-card { border-color: var(--primary); background: rgba(59,130,246,.1); }
+.method-card { padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: center; transition: all .2s; }
+.method-icon { font-size: 28px; margin-bottom: 6px; }
+.method-name { font-weight: 600; color: var(--text-bright); font-size: 14px; }
+.method-desc { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
+.form-note { background: rgba(59,130,246,.05); border: 1px solid rgba(59,130,246,.15); border-radius: var(--radius-sm); padding: 12px; color: var(--text-dim); font-size: 13px; }
+.form-actions { display: flex; justify-content: space-between; align-items: center; }
+.payment-result { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.result-icon { font-size: 64px; }
+.payment-result h2 { color: var(--text-bright); }
+.payment-result p { color: var(--text-dim); }
+.result-note { font-size: 13px; }
+</style>
+
+<%- include('partials/footer') %>

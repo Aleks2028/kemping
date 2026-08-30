@@ -1,0 +1,153 @@
+<%- include('partials/header') %>
+
+<div class="admin-page">
+  <h1>⚙️ Админ-панель</h1>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="overview">📊 Обзор</button>
+    <button class="admin-tab" data-tab="tasks">📋 Задания</button>
+    <button class="admin-tab" data-tab="completions">✅ Модерация</button>
+    <button class="admin-tab" data-tab="withdrawals">💸 Выплаты</button>
+    <button class="admin-tab" data-tab="users">👥 Пользователи</button>
+  </div>
+
+  <div id="admin-content">
+    <div class="loading">Загружаем…</div>
+  </div>
+</div>
+
+<script>
+  let currentTab = 'overview';
+
+  document.querySelectorAll('.admin-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentTab = t.dataset.tab;
+      loadTab();
+    });
+  });
+
+  async function api(path, options = {}) {
+    return fetch('/api/admin' + path, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+        ...(options.headers || {}),
+      },
+    }).then(r => r.json());
+  }
+
+  async function loadTab() {
+    const el = document.getElementById('admin-content');
+    el.innerHTML = '<div class="loading">Загружаем…</div>';
+
+    if (currentTab === 'overview') {
+      const stats = await api('/stats');
+      el.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value">${stats.totalUsers}</div><div>Пользователей</div></div>
+          <div class="stat-card"><div class="stat-value">${stats.pendingTasks}</div><div>Заданий на модерации</div></div>
+          <div class="stat-card"><div class="stat-value">${stats.pendingCompletions}</div><div>Выполнений на проверке</div></div>
+          <div class="stat-card"><div class="stat-value">${stats.pendingWithdrawals}</div><div>Заявок на вывод</div></div>
+          <div class="stat-card"><div class="stat-value">$${(stats.totalEarned / 100).toFixed(2)}</div><div>Заработано всего</div></div>
+        </div>
+      `;
+    } else if (currentTab === 'tasks') {
+      const { tasks } = await api('/tasks/pending');
+      el.innerHTML = tasks.length === 0 ? '<p class="empty">Нет заданий на модерации.</p>' :
+        tasks.map(t => `
+          <div class="admin-card">
+            <h3>${t.title}</h3>
+            <p>${t.description || ''}</p>
+            <p>URL: <a href="${t.url}" target="_blank">${t.url}</a></p>
+            <p>Тип: ${t.type} • Слотов: ${t.totalSlots} • Награда: $${(t.reward / 100).toFixed(2)}</p>
+            <div class="admin-actions">
+              <button class="btn btn-primary btn-sm" onclick="approveTask('${t.id}')">Одобрить</button>
+              <button class="btn btn-ghost btn-sm" onclick="rejectTask('${t.id}')">Отклонить</button>
+            </div>
+          </div>
+        `).join('');
+    } else if (currentTab === 'completions') {
+      const { completions } = await api('/completions/pending');
+      el.innerHTML = completions.length === 0 ? '<p class="empty">Нет ожидающих модерации.</p>' :
+        completions.map(c => `
+          <div class="admin-card">
+            <p><strong>Task:</strong> ${c.taskId}</p>
+            <p><strong>User:</strong> ${c.userId}</p>
+            <p><strong>Reward:</strong> $${(c.reward / 100).toFixed(2)}</p>
+            ${c.proofText ? `<p><strong>Proof:</strong> ${c.proofText}</p>` : ''}
+            <div class="admin-actions">
+              <button class="btn btn-primary btn-sm" onclick="approveCompletion('${c.id}')">Одобрить</button>
+              <button class="btn btn-ghost btn-sm" onclick="rejectCompletion('${c.id}')">Отклонить</button>
+            </div>
+          </div>
+        `).join('');
+    } else if (currentTab === 'withdrawals') {
+      const { withdrawals } = await api('/withdraw/pending');
+      el.innerHTML = withdrawals.length === 0 ? '<p class="empty">Нет заявок.</p>' :
+        withdrawals.map(w => `
+          <div class="admin-card">
+            <p><strong>ID:</strong> ${w.id}</p>
+            <p><strong>User:</strong> ${w.userId}</p>
+            <p><strong>Method:</strong> ${w.method}</p>
+            <p><strong>Amount:</strong> $${(w.amount / 100).toFixed(2)} → $${(w.finalAmount / 100).toFixed(2)}</p>
+            <p><strong>Wallet:</strong> <code>${w.wallet}</code></p>
+            <div class="admin-actions">
+              <button class="btn btn-primary btn-sm" onclick="approveWithdraw('${w.id}')">Выплатить</button>
+              <button class="btn btn-ghost btn-sm" onclick="rejectWithdraw('${w.id}')">Отклонить</button>
+            </div>
+          </div>
+        `).join('');
+    } else if (currentTab === 'users') {
+      const { users } = await api('/users');
+      el.innerHTML = `
+        <table class="admin-table">
+          <thead><tr><th>Username</th><th>Email</th><th>Баланс</th><th>Заработано</th><th>Дата</th><th></th></tr></thead>
+          <tbody>
+            ${users.map(u => `
+              <tr>
+                <td>${u.username}</td>
+                <td>${u.email}</td>
+                <td>$${(u.balance / 100).toFixed(2)}</td>
+                <td>$${(u.totalEarned / 100).toFixed(2)}</td>
+                <td>${new Date(u.createdAt * 1000).toLocaleDateString()}</td>
+                <td>${u.banned ? '<span class="status-rejected">Забанен</span>' : `<button class="btn btn-ghost btn-sm" onclick="banUser('${u.id}')">Бан</button>`}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+  }
+
+  async function approveTask(id) { await api('/tasks/' + id + '/approve', { method: 'POST' }); loadTab(); }
+  async function rejectTask(id) { await api('/tasks/' + id + '/reject', { method: 'POST', body: JSON.stringify({ reason: 'Отклонено' }) }); loadTab(); }
+  async function approveCompletion(id) { await api('/completions/' + id + '/approve', { method: 'POST' }); loadTab(); }
+  async function rejectCompletion(id) { await api('/completions/' + id + '/reject', { method: 'POST', body: JSON.stringify({ reason: 'Не прошло проверку' }) }); loadTab(); }
+  async function approveWithdraw(id) {
+    const txHash = prompt('Введите TX hash (опционально):');
+    await fetch('/api/withdraw/' + id + '/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+      body: JSON.stringify({ txHash }),
+    });
+    loadTab();
+  }
+  async function rejectWithdraw(id) {
+    const reason = prompt('Причина отклонения:') || 'Отклонено';
+    await api('/withdraw/' + id + '/reject', { method: 'POST', body: JSON.stringify({ reason }) });
+    loadTab();
+  }
+  async function banUser(id) {
+    if (confirm('Забанить пользователя?')) {
+      await api('/users/' + id + '/ban', { method: 'POST' });
+      loadTab();
+    }
+  }
+
+  loadTab();
+</script>
+
+<%- include('partials/footer') %>

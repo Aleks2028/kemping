@@ -1,0 +1,117 @@
+<%- include('partials/header') %>
+
+<div class="tasks-page">
+  <div class="page-header">
+    <h1>📋 Доступные задания</h1>
+    <div class="filter-tabs">
+      <button class="tab active" data-filter="all">Все</button>
+      <button class="tab" data-filter="subscribe">Подписки</button>
+      <button class="tab" data-filter="register">Регистрации</button>
+      <button class="tab" data-filter="like">Лайки</button>
+    </div>
+  </div>
+
+  <div id="tasks-list" class="tasks-list">
+    <div class="loading">Загружаем задания…</div>
+  </div>
+</div>
+
+<script>
+  async function loadTasks() {
+    const res = await fetch('/api/tasks', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    if (!res.ok) {
+      window.location.href = '/login';
+      return;
+    }
+    const { tasks } = await res.json();
+    const list = document.getElementById('tasks-list');
+
+    if (tasks.length === 0) {
+      list.innerHTML = '<div class="empty">Сейчас нет доступных заданий. Загляни позже!</div>';
+      return;
+    }
+
+    list.innerHTML = tasks.map(t => `
+      <div class="task-card" data-type="${t.type}">
+        <div class="task-header">
+          <span class="task-type task-type-${t.type}">${getTypeLabel(t.type)}</span>
+          <span class="task-reward">$${(t.userReward / 100).toFixed(2)}</span>
+        </div>
+        <h3 class="task-title">${escapeHtml(t.title)}</h3>
+        <p class="task-desc">${escapeHtml(t.description || '')}</p>
+        <div class="task-meta">
+          <span>👥 Осталось: <strong>${t.remainingSlots}</strong> из ${t.totalSlots}</span>
+          <span>${t.requiresProof ? '📸 С подтверждением' : '⚡ Авто-одобрение'}</span>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="startTask('${t.id}')">Выполнить →</button>
+      </div>
+    `).join('');
+  }
+
+  function getTypeLabel(type) {
+    return {
+      subscribe: 'Подписка',
+      register: 'Регистрация',
+      like: 'Лайк',
+      view: 'Просмотр',
+      custom: 'Задание',
+    }[type] ?? 'Задание';
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  async function startTask(id) {
+    const res = await fetch('/api/tasks/' + id + '/start', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const json = await res.json();
+    if (res.ok) {
+      const task = await (await fetch('/api/tasks/' + id, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      })).json();
+      window.open(task.url, '_blank');
+      if (task.requiresProof) {
+        setTimeout(() => {
+          const proof = prompt('Вставьте ссылку-подтверждение или описание выполнения:');
+          if (proof) {
+            fetch('/api/tasks/' + id + '/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              },
+              body: JSON.stringify({ completionId: json.completion.id, proofText: proof })
+            }).then(() => alert('Заявка отправлена на модерацию!'));
+          }
+        }, 2000);
+      } else {
+        alert('Задание принято в обработку');
+      }
+      loadTasks();
+    } else {
+      alert(json.error || 'Ошибка');
+    }
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.filter;
+      document.querySelectorAll('.task-card').forEach(card => {
+        card.style.display = (filter === 'all' || card.dataset.type === filter) ? 'block' : 'none';
+      });
+    });
+  });
+
+  loadTasks();
+</script>
+
+<%- include('partials/footer') %>

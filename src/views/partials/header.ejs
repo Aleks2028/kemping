@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title : 'Kemping' %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="logo">
+        <span class="logo-icon">💸</span>
+        <span class="logo-text">Kemping</span>
+      </a>
+      <nav class="nav">
+        <% if (typeof user !== 'undefined' && user) { %>
+          <a href="/tasks" class="nav-link">📋 Задания</a>
+          <a href="/profile" class="nav-link">👤 Профиль</a>
+          <a href="/withdraw" class="nav-link">💰 Вывод</a>
+          <a href="/advertiser" class="nav-link">📢 Рекламодателям</a>
+          <% if (user.isAdmin) { %>
+            <a href="/admin" class="nav-link nav-admin">⚙️ Админ</a>
+          <% } %>
+          <span class="balance-pill">$<%= (user.balance / 100).toFixed(2) %></span>
+          <a href="#" onclick="logout(); return false;" class="nav-link">Выйти</a>
+        <% } else { %>
+          <a href="/login" class="nav-link">Войти</a>
+          <a href="/register" class="btn btn-primary btn-sm">Регистрация</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+  <main class="main">
+    <div class="container">
