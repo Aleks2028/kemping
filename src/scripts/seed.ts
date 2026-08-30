@@ -9,7 +9,7 @@ import { UserModel } from "../models/user";
  * Вызывается при старте.
  */
 
-const SEED_VERSION = 3; // увеличивай при изменении демо-данных
+const SEED_VERSION = 4; // увеличивай при изменении демо-данных
 
 const DEMO_USERS = [
   { username: "telegram_promo", email: "tg@demo.com", password: "demo123" },
@@ -22,57 +22,57 @@ const DEMO_USERS = [
 const ADVERTISERS = [
   {
     username: "telegram_promo",
-    companyName: "CryptoNews Daily",
+    companyName: "Крипто Новости",
     contact: "@cryptonews_daily",
-    budget: 5000, // cents
+    budget: 5000,
     tasks: [
-      { title: "Подписаться на наш Telegram-канал", description: "Подпишитесь на @cryptonews_daily. После подписки сделайте скриншот.", type: "subscribe", url: "https://t.me/cryptonews_daily", userReward: 2, slots: 100, requiresProof: true, proofInstructions: "Пришлите скриншот подписки или username в Telegram" },
-      { title: "Подписаться на премиум-канал", description: "Подписка на закрытый канал с сигналами.", type: "subscribe", url: "https://t.me/cryptonews_premium", userReward: 5, slots: 30, requiresProof: true, proofInstructions: "Скриншот с подпиской" },
-      { title: "Вступить в чат", description: "Вступите в наш общий чат трейдеров.", type: "subscribe", url: "https://t.me/cryptonews_chat", userReward: 2, slots: 200, requiresProof: false },
+      { title: "Подписаться на Telegram-канал", description: "Подпишитесь на канал @cryptonews_daily. После подписки сделайте скриншот.", type: "subscribe", url: "https://t.me/cryptonews_daily", userReward: 2, slots: 100, requiresProof: true, proofInstructions: "Пришлите скриншот подписки" },
+      { title: "Подписаться на канал «Сигналы»", description: "Подписка на канал с торговыми сигналами.", type: "subscribe", url: "https://t.me/trading_signals_2025", userReward: 3, slots: 50, requiresProof: true, proofInstructions: "Скриншот с подпиской" },
+      { title: "Вступить в чат трейдеров", description: "Вступите в общий чат крипто-трейдеров.", type: "subscribe", url: "https://t.me/crypto_traders_chat", userReward: 2, slots: 100, requiresProof: false },
     ],
   },
   {
     username: "youtube_grow",
-    companyName: "TechReview Channel",
+    companyName: "Обзоры техники",
     contact: "tech@demo.com",
     budget: 8000,
     tasks: [
-      { title: "Подписаться на YouTube-канал", description: "Подпишитесь и нажмите колокольчик.", type: "subscribe", url: "https://youtube.com/@techreview", userReward: 3, slots: 80, requiresProof: true },
-      { title: "Посмотреть видео до конца", description: "Посмотрите наш новый обзор iPhone 17.", type: "view", url: "https://youtube.com/watch?v=demo1", userReward: 2, slots: 100, requiresProof: false },
-      { title: "Поставить лайк под видео", description: "Поставьте лайк под роликом «Топ-10 нейросетей 2026».", type: "like", url: "https://youtube.com/watch?v=demo2", userReward: 2, slots: 200, requiresProof: false },
+      { title: "Подписаться на YouTube-канал", description: "Подпишитесь на канал и нажмите колокольчик, чтобы не пропустить новые видео.", type: "subscribe", url: "https://www.youtube.com/@ixbttv", userReward: 3, slots: 80, requiresProof: false },
+      { title: "Посмотреть видео до конца", description: "Посмотрите обзор нового iPhone 16 Pro. Видео длится 15 минут — досмотрите до конца.", type: "view", url: "https://www.youtube.com/watch?v=KpVDoFh2K3w", userReward: 2, slots: 100, requiresProof: false },
+      { title: "Поставить лайк видео", description: "Поставьте лайк под обзором нового MacBook Pro.", type: "like", url: "https://www.youtube.com/watch?v=KpVDoFh2K3w", userReward: 2, slots: 200, requiresProof: false },
     ],
   },
   {
     username: "app_installs",
-    companyName: "MobileApps Promo",
+    companyName: "Приложения и софт",
     contact: "@mobile_apps",
     budget: 15000,
     tasks: [
-      { title: "Установить приложение", description: "Скачайте наше приложение из Google Play и откройте его.", type: "register", url: "https://play.google.com/store/apps/details?id=demo.app", userReward: 10, slots: 50, requiresProof: true, proofInstructions: "Скриншот главного экрана приложения" },
-      { title: "Регистрация в приложении", description: "Создайте аккаунт в нашем приложении.", type: "register", url: "https://demo.app/register", userReward: 15, slots: 30, requiresProof: true, proofInstructions: "Скриншот профиля" },
-      { title: "Оставить отзыв в Google Play", description: "Поставьте 5 звёзд и напишите отзыв.", type: "custom", url: "https://play.google.com/store/apps/details?id=demo.app", userReward: 8, slots: 25, requiresProof: true, proofInstructions: "Ссылка на отзыв или скриншот" },
+      { title: "Установить и открыть приложение", description: "Скачайте приложение Кинопоиск из Google Play и откройте его.", type: "register", url: "https://play.google.com/store/apps/details?id=ru.kinopoisk", userReward: 8, slots: 50, requiresProof: true, proofInstructions: "Скриншот открытого приложения" },
+      { title: "Регистрация в приложении", description: "Зарегистрируйтесь в приложении VK (ВКонтакте).", type: "register", url: "https://play.google.com/store/apps/details?id=com.vkontakte.android", userReward: 10, slots: 30, requiresProof: true, proofInstructions: "Скриншот профиля" },
+      { title: "Оставить отзыв в Google Play", description: "Поставьте 5 звёзд и напишите короткий отзыв приложению.", type: "custom", url: "https://play.google.com/store/apps/details?id=ru.kinopoisk", userReward: 10, slots: 25, requiresProof: true, proofInstructions: "Ссылка на ваш отзыв или скриншот" },
     ],
   },
   {
     username: "social_boost",
-    companyName: "Instagram Growth",
+    companyName: "Социальные сети",
     contact: "@ig_growth",
     budget: 6000,
     tasks: [
-      { title: "Подписаться на Instagram", description: "Подпишитесь на @travel_with_us.", type: "subscribe", url: "https://instagram.com/travel_with_us", userReward: 3, slots: 100, requiresProof: true },
-      { title: "Лайк + комментарий", description: "Поставьте лайк и напишите комментарий к последнему посту.", type: "like", url: "https://instagram.com/p/demo", userReward: 2, slots: 80, requiresProof: true, proofInstructions: "Скриншот комментария" },
-      { title: "Репост сторис", description: "Сделайте репост нашей сторис в свою ленту.", type: "custom", url: "https://instagram.com/stories/demo", userReward: 3, slots: 60, requiresProof: true },
+      { title: "Подписаться на Instagram", description: "Подпишитесь на @travel_with_us — канал о путешествиях.", type: "subscribe", url: "https://instagram.com/travel_with_us", userReward: 3, slots: 100, requiresProof: true },
+      { title: "Лайк и комментарий", description: "Поставьте лайк и напишите комментарий под последним постом.", type: "like", url: "https://instagram.com/p/DH8xXXXXX", userReward: 2, slots: 80, requiresProof: true, proofInstructions: "Скриншот комментария" },
+      { title: "Подписаться на Telegram-канал", description: "Подпишитесь на канал о нейросетях и ИИ.", type: "subscribe", url: "https://t.me/neuro_ai_news", userReward: 3, slots: 60, requiresProof: false },
     ],
   },
   {
     username: "news_subs",
-    companyName: "Daily News Aggregator",
+    companyName: "Новости и медиа",
     contact: "news@demo.com",
     budget: 4000,
     tasks: [
-      { title: "Подписаться на email-рассылку", description: "Подпишитесь на нашу ежедневную рассылку.", type: "register", url: "https://news.demo.com/subscribe", userReward: 4, slots: 50, requiresProof: true, proofInstructions: "Скриншот подтверждения email" },
-      { title: "Поделиться статьёй в соцсетях", description: "Поделитесь любой нашей статьёй в Facebook/Twitter.", type: "custom", url: "https://news.demo.com/article-1", userReward: 2, slots: 100, requiresProof: true },
-      { title: "Регистрация на сайте", description: "Создайте аккаунт на нашем новостном портале.", type: "register", url: "https://news.demo.com/register", userReward: 5, slots: 40, requiresProof: true },
+      { title: "Подписаться на канал новостей", description: "Подпишитесь на канал Лента.ру — последние новости.", type: "subscribe", url: "https://t.me/lentaru", userReward: 3, slots: 50, requiresProof: false },
+      { title: "Подписаться на YouTube-канал", description: "Подпишитесь на канал Популярная механика — наука и технологии.", type: "subscribe", url: "https://www.youtube.com/@popmech", userReward: 3, slots: 40, requiresProof: false },
+      { title: "Посмотреть видео-новость", description: "Посмотрите последний выпуск новостей технологий.", type: "view", url: "https://www.youtube.com/watch?v=livestream1", userReward: 2, slots: 100, requiresProof: false },
     ],
   },
 ];
