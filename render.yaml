@@ -18,7 +18,7 @@ services:
       - key: DATABASE_URL
         value: /app/data/earn2surf.db
       - key: PLATFORM_FEE_PERCENT
-        value: 20
+        value: 70
       - key: REFERRAL_BONUS_PERCENT
         value: 10
       - key: MIN_WITHDRAWAL_USD
