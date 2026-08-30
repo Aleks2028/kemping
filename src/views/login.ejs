@@ -16,6 +16,8 @@
         <input type="password" id="password" name="password" required />
       </div>
 
+      <div id="login-error" class="form-error" style="display:none;"></div>
+
       <button type="submit" class="btn btn-primary btn-block">Войти</button>
     </form>
 
@@ -24,8 +26,6 @@
     </p>
   </div>
 </div>
-
-<div id="login-error" class="form-error" style="display:none;"></div>
 
 <script>
   document.getElementById('login-form').addEventListener('submit', async (e) => {
