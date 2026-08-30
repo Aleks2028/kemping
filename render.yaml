@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: kemping
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: BCRYPT_ROUNDS
+        value: 12
+      - key: DATABASE_URL
+        value: /app/data/earn2surf.db
+      - key: PLATFORM_FEE_PERCENT
+        value: 20
+      - key: REFERRAL_BONUS_PERCENT
+        value: 10
+      - key: MIN_WITHDRAWAL_USD
+        value: 5

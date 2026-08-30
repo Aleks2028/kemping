@@ -25,21 +25,31 @@
   </div>
 </div>
 
+<div id="login-error" class="form-error" style="display:none;"></div>
+
 <script>
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const errBox = document.getElementById('login-error');
+    errBox.style.display = 'none';
     const data = Object.fromEntries(new FormData(e.target));
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    if (res.ok) {
-      localStorage.setItem('token', json.token);
-      window.location.href = '/tasks';
-    } else {
-      alert(json.error || 'Ошибка входа');
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', json.token);
+        window.location.href = '/tasks';
+      } else {
+        errBox.textContent = json.error || 'Ошибка входа';
+        errBox.style.display = 'block';
+      }
+    } catch (err) {
+      errBox.textContent = 'Ошибка сети: ' + err.message;
+      errBox.style.display = 'block';
     }
   });
 </script>
