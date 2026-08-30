@@ -21,10 +21,23 @@ export interface JwtPayload {
 }
 
 export function authOptional(req: Request, res: Response, next: NextFunction) {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) return next();
+  let token = "";
 
-  const token = header.slice(7);
+  // 1. Authorization header
+  const header = req.headers.authorization;
+  if (header?.startsWith("Bearer ")) {
+    token = header.slice(7);
+  }
+
+  // 2. Cookie
+  if (!token) {
+    const cookies = req.headers.cookie || "";
+    const match = cookies.match(/(?:^|;\s*)token=([^;]*)/);
+    if (match) token = match[1];
+  }
+
+  if (!token) return next();
+
   try {
     const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
     const user = UserModel.getById(payload.userId);

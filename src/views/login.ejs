@@ -41,8 +41,12 @@
       });
       const json = await res.json();
       if (res.ok) {
-        localStorage.setItem('token', json.token);
-        window.location.href = '/tasks';
+        try {
+          localStorage.setItem('token', json.token);
+        } catch (e) {
+          document.cookie = 'token=' + json.token + '; path=/; max-age=604800';
+        }
+        window.location.href = '/tasks?token=' + encodeURIComponent(json.token);
       } else {
         errBox.textContent = json.error || 'Ошибка входа';
         errBox.style.display = 'block';
