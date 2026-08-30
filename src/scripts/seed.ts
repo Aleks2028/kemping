@@ -5,11 +5,11 @@ import { UserModel } from "../models/user";
 
 /**
  * Сидер: заполняет БД демо-рекламодателями и заданиями.
- * Вызывается при старте, если в БД нет ни одного рекламодателя.
- *
- * Цены указаны как userReward (сколько получит исполнитель).
- * Стоимость для рекламодателя = userReward * 100 / (100 - PLATFORM_FEE_PERCENT).
+ * Если VERSION изменился — удаляет старые задания и создаёт новые с актуальными ценами.
+ * Вызывается при старте.
  */
+
+const SEED_VERSION = 3; // увеличивай при изменении демо-данных
 
 const DEMO_USERS = [
   { username: "telegram_promo", email: "tg@demo.com", password: "demo123" },
@@ -78,13 +78,42 @@ const ADVERTISERS = [
 ];
 
 export function seedDemoData() {
-  // Если уже есть рекламодатели, не сидируем
-  const existing = db.prepare("SELECT COUNT(*) as c FROM advertisers").get() as any;
-  if (existing.c > 0) {
-    return { seeded: false, reason: "advertisers already exist" };
+  // Проверяем версию сида
+  let currentVersion = 0;
+  try {
+    const row = db.prepare("SELECT value FROM meta WHERE key = 'seed_version'").get() as any;
+    currentVersion = row ? Number(row.value) : 0;
+  } catch (e) {
+    // Таблицы meta нет — создаём
+    db.exec("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)");
   }
 
-  console.log("🌱 Seeding demo advertisers and tasks…");
+  const existing = db.prepare("SELECT COUNT(*) as c FROM advertisers").get() as any;
+
+  // Если версия актуальна и рекламодатели есть — не трогаем
+  if (currentVersion >= SEED_VERSION && existing.c > 0) {
+    return { seeded: false, reason: `seed version ${currentVersion} up to date` };
+  }
+
+  // Если версия устарела — удаляем старые демо-задания и пересоздаём
+  if (existing.c > 0) {
+    console.log(`🔄 Seed version ${currentVersion} → ${SEED_VERSION}, refreshing demo tasks…`);
+    // Удаляем только демо-задания (по user_referrer)
+    db.prepare(`
+      DELETE FROM task_completions WHERE task_id IN (
+        SELECT id FROM tasks WHERE advertiser_id IN (
+          SELECT id FROM advertisers WHERE contact LIKE '@%' OR contact LIKE '%demo%' OR contact LIKE '%@demo%'
+        )
+      )
+    `).run();
+    db.prepare(`
+      DELETE FROM tasks WHERE advertiser_id IN (
+        SELECT id FROM advertisers WHERE contact LIKE '@%' OR contact LIKE '%demo%' OR contact LIKE '%@demo%'
+      )
+    `).run();
+  } else {
+    console.log("🌱 Seeding demo advertisers and tasks…");
+  }
 
   for (const userData of DEMO_USERS) {
     if (UserModel.getByEmail(userData.email)) continue;
@@ -153,7 +182,11 @@ export function seedDemoData() {
   }
 
   console.log(`✅ Seeded ${ADVERTISERS.length} advertisers and ${taskCount} tasks`);
-  return { seeded: true, advertisers: ADVERTISERS.length, tasks: taskCount };
+
+  // Сохраняем версию сида
+  db.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('seed_version', ?)").run(String(SEED_VERSION));
+
+  return { seeded: true, advertisers: ADVERTISERS.length, tasks: taskCount, version: SEED_VERSION };
 }
 
 // Запуск как скрипт
