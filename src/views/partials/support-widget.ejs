@@ -1,0 +1,338 @@
+<!-- ─── Онлайн-поддержка ─────────────────────────────────────── -->
+<style>
+.support-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.support-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  position: relative;
+}
+.support-toggle:hover { transform: scale(1.08); box-shadow: 0 12px 32px rgba(236, 72, 153, 0.5); }
+.support-toggle .badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: #10b981;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 100px;
+  border: 2px solid white;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.support-window {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 540px;
+  max-height: calc(100vh - 100px);
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e9d5ff;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.support-window.open { display: flex; }
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.support-header {
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.support-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.support-info { flex: 1; }
+.support-name { font-weight: 700; font-size: 15px; }
+.support-status { font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 4px; }
+.support-status::before {
+  content: '';
+  width: 8px; height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+.support-close {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.support-close:hover { background: rgba(255,255,255,0.3); }
+
+.support-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #faf5ff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.support-msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.support-msg.bot {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid #e9d5ff;
+  color: #1e1b3a;
+  border-bottom-left-radius: 4px;
+}
+.support-msg.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+.support-msg-time {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 4px;
+  display: block;
+}
+
+.support-quick {
+  padding: 8px 16px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  background: #faf5ff;
+  border-top: 1px solid #e9d5ff;
+  scrollbar-width: none;
+}
+.support-quick::-webkit-scrollbar { display: none; }
+.support-quick-btn {
+  background: white;
+  border: 1px solid #e9d5ff;
+  border-radius: 100px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #a855f7;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.support-quick-btn:hover {
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.support-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #e9d5ff;
+}
+.support-input input {
+  flex: 1;
+  border: 1px solid #e9d5ff;
+  border-radius: 100px;
+  padding: 10px 16px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  background: #faf5ff;
+  transition: border-color 0.2s;
+}
+.support-input input:focus { border-color: #a855f7; background: white; }
+.support-send {
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.support-send:hover { transform: scale(1.05); }
+.support-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .support-window { width: calc(100vw - 32px); height: calc(100vh - 100px); }
+  .support-fab { right: 16px; bottom: 16px; }
+  .support-toggle { width: 54px; height: 54px; font-size: 24px; }
+}
+</style>
+
+<div class="support-fab">
+  <div class="support-window" id="supportWindow">
+    <div class="support-header">
+      <div class="support-avatar">💬</div>
+      <div class="support-info">
+        <div class="support-name">Поддержка Kemping</div>
+        <div class="support-status">Онлайн • отвечаем за 5 минут</div>
+      </div>
+      <button class="support-close" onclick="toggleSupport()">✕</button>
+    </div>
+
+    <div class="support-messages" id="supportMessages">
+      <div class="support-msg bot">
+        👋 Привет! Я бот поддержки Kemping. Чем могу помочь?
+        <span class="support-msg-time">сейчас</span>
+      </div>
+    </div>
+
+    <div class="support-quick" id="supportQuick">
+      <button class="support-quick-btn" onclick="sendQuick('Как пополнить баланс?')">💰 Пополнить</button>
+      <button class="support-quick-btn" onclick="sendQuick('Не пришли деньги')">⏳ Деньги не пришли</button>
+      <button class="support-quick-btn" onclick="sendQuick('Минимальный вывод')">💵 Вывод</button>
+      <button class="support-quick-btn" onclick="sendQuick('Связаться с оператором')">👤 Оператор</button>
+    </div>
+
+    <form class="support-input" id="supportForm" onsubmit="sendSupportMessage(event)">
+      <input type="text" id="supportInput" placeholder="Напишите сообщение..." autocomplete="off" />
+      <button type="submit" class="support-send">➤</button>
+    </form>
+  </div>
+
+  <button class="support-toggle" id="supportToggle" onclick="toggleSupport()" aria-label="Открыть чат поддержки">
+    💬
+    <span class="badge">!</span>
+  </button>
+</div>
+
+<script>
+const SUPPORT_RESPONSES = {
+  'пополнить': 'Для пополнения баланса:\n\n1. Зайди в "Кабинет рекламодателя"\n2. Нажми "💰 Пополнить баланс"\n3. Выбери способ: USDT, BTC, ETH, TON, SOL, BNB, карта или ЮMoney\n4. Введи сумму от $1\n5. Оплати и баланс зачислится автоматически\n\nНужна помощь? Напиши оператору 👤',
+  'не пришли': 'Если деньги не пришли:\n\n• USDT TRC-20 — подожди 1-5 минут после подтверждения сети\n• BTC — 10-30 минут\n• ETH — 5-15 минут\n• Карта — мгновенно\n\nЕсли прошло больше времени — нажми "✅ Я отправил(а)" в окне оплаты. Если и это не помогло — напиши оператору с указанием суммы и кошелька.',
+  'минимальный вывод': 'Минимальный вывод — $10.\n\n⚠️ Важно: для активации вывода нужно сначала пополнить баланс рекламодателя от $10.\n\nСпособы вывода:\n• USDT (TRC-20) — комиссия $1\n• ЮMoney — комиссия $0.50\n• Банковская карта — комиссия $2',
+  'оператор': 'Сейчас подключу оператора ✈️\n\nНапишите ваш вопрос и контакт (Telegram или email), и мы ответим в течение часа:\n\n📧 lek90057@mail.ru\n✈️ https://t.me/irbis2087',
+  'default': 'Спасибо за сообщение! 🤝\n\nЯ — бот, и могу не понять твой вопрос. Выбери одну из тем выше или напиши оператору:\n\n📧 lek90057@mail.ru\n✈️ https://t.me/irbis2087',
+};
+
+let supportOpen = false;
+let supportFirstOpen = true;
+
+function toggleSupport() {
+  supportOpen = !supportOpen;
+  const win = document.getElementById('supportWindow');
+  const fab = document.getElementById('supportToggle');
+  if (supportOpen) {
+    win.classList.add('open');
+    fab.innerHTML = '✕';
+    fab.querySelector('.badge')?.remove();
+    if (supportFirstOpen) {
+      supportFirstOpen = false;
+      setTimeout(() => {
+        addBotMessage('Кстати, у нас сейчас:\n• 🎁 Бонус $0.10 за регистрацию\n• 💸 Вывод от $10 на USDT, ЮMoney или карту\n• ⚡ Задания от $0.02 за 2 минуты');
+      }, 800);
+    }
+  } else {
+    win.classList.remove('open');
+    fab.innerHTML = '💬<span class="badge">!</span>';
+  }
+}
+
+function addMessage(text, type = 'user') {
+  const messages = document.getElementById('supportMessages');
+  const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const msg = document.createElement('div');
+  msg.className = 'support-msg ' + type;
+  msg.innerHTML = text.replace(/\n/g, '<br>') + `<span class="support-msg-time">${time}</span>`;
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function addBotMessage(text) {
+  addMessage(text, 'bot');
+}
+
+function sendQuick(text) {
+  addMessage(text, 'user');
+  setTimeout(() => {
+    const lower = text.toLowerCase();
+    let response = SUPPORT_RESPONSES.default;
+    if (lower.includes('пополн')) response = SUPPORT_RESPONSES['пополнить'];
+    else if (lower.includes('не пришл') || lower.includes('деньги') || lower.includes('где')) response = SUPPORT_RESPONSES['не пришли'];
+    else if (lower.includes('вывод') || lower.includes('минимальн')) response = SUPPORT_RESPONSES['минимальный вывод'];
+    else if (lower.includes('оператор') || lower.includes('человек')) response = SUPPORT_RESPONSES['оператор'];
+    addBotMessage(response);
+  }, 600);
+}
+
+function sendSupportMessage(e) {
+  e.preventDefault();
+  const input = document.getElementById('supportInput');
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage(text, 'user');
+  input.value = '';
+  setTimeout(() => sendQuick(text), 500);
+}
+
+// Авто-открытие через 30 секунд
+setTimeout(() => {
+  if (!sessionStorage.getItem('supportSeen') && !supportOpen) {
+    sessionStorage.setItem('supportSeen', '1');
+    const fab = document.getElementById('supportToggle');
+    if (fab) fab.style.animation = 'pulse 1.5s ease-in-out 3';
+  }
+}, 30000);
+</script>
