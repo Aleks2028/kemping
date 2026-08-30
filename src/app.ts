@@ -110,6 +110,25 @@ app.listen(PORT, () => {
   } catch (e) {
     console.warn("⚠️ Не удалось засидировать демо-данные:", e);
   }
+
+  // Гарантируем существование админа (для Render, где SQLite не сохраняется)
+  try {
+    const { UserModel } = require("./models/user");
+    const { db } = require("./models/database");
+    const adminEmail = "admin@kemping.ru";
+    let admin = UserModel.getByEmail(adminEmail);
+    if (!admin) {
+      admin = UserModel.create({
+        username: "admin",
+        email: adminEmail,
+        password: "admin123",
+      });
+    }
+    db.prepare("UPDATE users SET is_admin = 1 WHERE id = ?").run(admin.id);
+    console.log(`👑 Админ готов: admin / admin123`);
+  } catch (e) {
+    console.warn("⚠️ Не удалось создать админа:", e);
+  }
 });
 
 export default app;
