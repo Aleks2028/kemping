@@ -16,6 +16,8 @@ function rowToUser(row: any): User {
     pendingBalance: row.pending_balance,
     totalEarned: row.total_earned,
     totalWithdrawn: row.total_withdrawn,
+    totalDeposited: row.total_deposited ?? 0,
+    deposited: !!row.deposited,
     referredBy: row.referred_by ?? undefined,
     isAdvertiser: !!row.is_advertiser,
     isAdmin: !!row.is_admin,

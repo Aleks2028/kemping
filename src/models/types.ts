@@ -8,6 +8,8 @@ export interface User {
   pendingBalance: number;
   totalEarned: number;
   totalWithdrawn: number;
+  totalDeposited: number;
+  deposited: boolean;
   referredBy?: string;
   isAdvertiser: boolean;
   isAdmin: boolean;

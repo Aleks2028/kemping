@@ -1,5 +1,34 @@
 <%- include('partials/header') %>
 
+<style>
+.withdraw-lock {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.withdraw-lock-icon { font-size: 64px; margin-bottom: 16px; }
+.withdraw-lock h2 { color: #b45309; font-size: 24px; margin-bottom: 12px; }
+.withdraw-lock p { color: #92400e; font-size: 15px; line-height: 1.6; margin-bottom: 20px; }
+.withdraw-lock .btn-deposit {
+  display: inline-block;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 16px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+}
+.withdraw-lock .btn-deposit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+.lock-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 20px; }
+.lock-feature { background: rgba(255,255,255,0.6); padding: 12px; border-radius: 8px; font-size: 13px; color: #78350f; }
+</style>
+
 <div class="withdraw-page">
   <h1>💰 Вывод средств</h1>
 
@@ -8,49 +37,67 @@
     <div class="balance-amount">$<%= (user.balance / 100).toFixed(2) %></div>
   </div>
 
-  <form id="withdraw-form" class="withdraw-form">
-    <div class="form-group">
-      <label>Способ вывода</label>
-      <div class="methods">
-        <label class="method">
-          <input type="radio" name="method" value="usdt_trc20" required />
-          <div class="method-card">
-            <div class="method-icon">💲</div>
-            <div class="method-name">USDT (TRC20)</div>
-            <div class="method-fee">Комиссия: $1.00</div>
-          </div>
-        </label>
-        <label class="method">
-          <input type="radio" name="method" value="yoomoney" />
-          <div class="method-card">
-            <div class="method-icon">💳</div>
-            <div class="method-name">ЮMoney</div>
-            <div class="method-fee">Комиссия: $0.50</div>
-          </div>
-        </label>
-        <label class="method">
-          <input type="radio" name="method" value="card" />
-          <div class="method-card">
-            <div class="method-icon">🏦</div>
-            <div class="method-name">Банковская карта</div>
-            <div class="method-fee">Комиссия: $2.00</div>
-          </div>
-        </label>
+  <% if (!user.deposited) { %>
+    <div class="withdraw-lock">
+      <div class="withdraw-lock-icon">🔒</div>
+      <h2>Вывод временно недоступен</h2>
+      <p>Для активации вывода средств внесите депозит от <strong>$10</strong>.<br>
+         Это подтверждает ваш аккаунт и защищает платформу от мошенников.</p>
+
+      <a href="/advertiser/deposit" class="btn-deposit">💰 Пополнить баланс от $10</a>
+
+      <div class="lock-features">
+        <div class="lock-feature">✅ Доступ к заданиям</div>
+        <div class="lock-feature">✅ Вывод от $10</div>
+        <div class="lock-feature">✅ Приоритет в поддержке</div>
+        <div class="lock-feature">✅ Бонус 5% к заработку</div>
       </div>
     </div>
+  <% } else { %>
+    <form id="withdraw-form" class="withdraw-form">
+      <div class="form-group">
+        <label>Способ вывода</label>
+        <div class="methods">
+          <label class="method">
+            <input type="radio" name="method" value="usdt_trc20" required />
+            <div class="method-card">
+              <div class="method-icon">💲</div>
+              <div class="method-name">USDT (TRC20)</div>
+              <div class="method-fee">Комиссия: $1.00</div>
+            </div>
+          </label>
+          <label class="method">
+            <input type="radio" name="method" value="yoomoney" />
+            <div class="method-card">
+              <div class="method-icon">💳</div>
+              <div class="method-name">ЮMoney</div>
+              <div class="method-fee">Комиссия: $0.50</div>
+            </div>
+          </label>
+          <label class="method">
+            <input type="radio" name="method" value="card" />
+            <div class="method-card">
+              <div class="method-icon">🏦</div>
+              <div class="method-name">Банковская карта</div>
+              <div class="method-fee">Комиссия: $2.00</div>
+            </div>
+          </label>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="amount">Сумма (USD)</label>
-      <input type="number" id="amount" name="amount" min="10" step="0.01" required placeholder="Минимум $10" />
-    </div>
+      <div class="form-group">
+        <label for="amount">Сумма (USD)</label>
+        <input type="number" id="amount" name="amount" min="10" step="0.01" required placeholder="Минимум $10" />
+      </div>
 
-    <div class="form-group">
-      <label for="wallet">Кошелёк / номер карты</label>
-      <input type="text" id="wallet" name="wallet" required placeholder="T... или 4100..." />
-    </div>
+      <div class="form-group">
+        <label for="wallet">Кошелёк / номер карты</label>
+        <input type="text" id="wallet" name="wallet" required placeholder="T... или 4100..." />
+      </div>
 
-    <button type="submit" class="btn btn-primary btn-lg btn-block">Заказать вывод</button>
-  </form>
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Заказать вывод</button>
+    </form>
+  <% } %>
 
   <section class="withdraw-history">
     <h2>📜 История выводов</h2>
@@ -59,7 +106,7 @@
 </div>
 
 <script>
-  document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+  document.getElementById('withdraw-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.target));
     const res = await fetch('/api/withdraw', {

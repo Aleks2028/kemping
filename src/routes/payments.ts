@@ -159,6 +159,9 @@ router.get("/check/:orderId", requireAuth, async (req: Request, res: Response) =
       if (advertiser) {
         AdvertiserModel.deposit(advertiser.id, order.amount_cents);
         confirmPaymentOrder(order.id);
+        // Активируем депозит для пользователя
+        db.prepare("UPDATE users SET deposited = 1, total_deposited = COALESCE(total_deposited, 0) + ? WHERE id = ?")
+          .run(order.amount_cents, advertiser.userId);
         return res.json({ status: "confirmed", amount: order.amount_cents });
       }
     }
@@ -206,6 +209,13 @@ router.post("/confirm/:orderId", requireAuth, (req: Request, res: Response) => {
   // Это для ручной модерации или тестов
   AdvertiserModel.deposit(order.advertiser_id, order.amount_cents);
   confirmPaymentOrder(order.id);
+
+  // Активируем депозит для пользователя
+  const adv = AdvertiserModel.getById(order.advertiser_id);
+  if (adv) {
+    db.prepare("UPDATE users SET deposited = 1, total_deposited = COALESCE(total_deposited, 0) + ? WHERE id = ?")
+      .run(order.amount_cents, adv.userId);
+  }
 
   return res.json({ status: "confirmed", amount: order.amount_cents });
 });

@@ -61,6 +61,18 @@ export const AdvertiserModel = {
     db.prepare(`
       UPDATE advertisers SET balance = balance + ? WHERE id = ?
     `).run(amountCents, advertiserId);
+
+    // Считаем общую сумму пополнений пользователя
+    const adv = this.getById(advertiserId);
+    if (adv) {
+      const userTotal = db.prepare(`
+        SELECT COALESCE(SUM(amount_cents), 0) as total
+        FROM payment_orders
+        WHERE advertiser_id = ? AND status = 'confirmed'
+      `).get(advertiserId) as any;
+      db.prepare("UPDATE users SET total_deposited = ?, deposited = 1 WHERE id = ?")
+        .run(userTotal.total ?? amountCents, adv.userId);
+    }
   },
 
   // Списание за создание задания или VIP-услуги

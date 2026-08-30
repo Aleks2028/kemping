@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS users (
   pending_balance INTEGER DEFAULT 0,
   total_earned INTEGER DEFAULT 0,
   total_withdrawn INTEGER DEFAULT 0,
+  total_deposited INTEGER DEFAULT 0,
+  deposited INTEGER DEFAULT 0,
   referred_by TEXT,
   is_advertiser INTEGER DEFAULT 0,
   is_admin INTEGER DEFAULT 0,
