@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 import {
   TRONGRID_API_KEY, USDT_TRC20_WALLET,
-  BTC_ADDRESS, ETH_ADDRESS,
+  BTC_ADDRESS, ETH_ADDRESS, TON_ADDRESS, SOL_ADDRESS, BNB_ADDRESS,
   YOOMONEY_WALLET, YOOMONEY_NOTIFICATION_SECRET,
   YOOKASSA_SHOP_ID, YOOKASSA_SECRET_KEY, YOOKASSA_RETURN_URL,
   CRYPTO_RATES,
@@ -164,23 +164,26 @@ export async function checkUsdtDeposits(): Promise<void> {
   }
 }
 
-// ─── BTC / ETH ─────────────────────────────────────────────────────────────────
+// ─── BTC / ETH / TON / SOL / BNB ────────────────────────────────────────────────
+
+type CryptoCurrency = "BTC" | "ETH" | "TON" | "SOL" | "BNB";
 
 interface CryptoDepositRecord {
   txHash: string;
   advertiserId: string;
   amountCents: number;
-  currency: "BTC" | "ETH";
+  currency: CryptoCurrency;
   status: "pending" | "confirmed";
   createdAt: number;
 }
 
 const pendingCryptoDeposits = new Map<string, CryptoDepositRecord>();
 
+// Дополнительные кошельки импортированы из config
 export function createCryptoDeposit(
   advertiserId: string,
   amountCents: number,
-  currency: "BTC" | "ETH"
+  currency: CryptoCurrency
 ): { depositId: string; address: string; amountCrypto: string; rate: number } {
   const depositId = uuidv4();
   const deposit: CryptoDepositRecord = {
@@ -193,12 +196,21 @@ export function createCryptoDeposit(
   };
   pendingCryptoDeposits.set(depositId, deposit);
 
-  const rate = CRYPTO_RATES[currency];
-  const amountCrypto = (amountCents / 100 / rate).toFixed(8);
+  const rate = CRYPTO_RATES[currency as keyof typeof CRYPTO_RATES] ?? 1;
+  const decimals = currency === "BTC" || currency === "ETH" ? 8 : (currency === "SOL" ? 6 : 2);
+  const amountCrypto = (amountCents / 100 / rate).toFixed(decimals);
+
+  const addressMap: Record<CryptoCurrency, string> = {
+    BTC: BTC_ADDRESS,
+    ETH: ETH_ADDRESS,
+    TON: TON_ADDRESS,
+    SOL: SOL_ADDRESS,
+    BNB: BNB_ADDRESS,
+  };
 
   return {
     depositId,
-    address: currency === "BTC" ? BTC_ADDRESS : ETH_ADDRESS,
+    address: addressMap[currency] || "",
     amountCrypto,
     rate,
   };

@@ -83,6 +83,42 @@ router.post("/deposit", requireAuth, async (req: Request, res: Response) => {
         });
       }
 
+      case "ton": {
+        const result = createCryptoDeposit(advertiser.id, amountCents, "TON");
+        return res.json({
+          method: "ton",
+          orderId,
+          address: result.address,
+          amountTon: result.amountCrypto,
+          rate: result.rate,
+          amount: amountUsd,
+        });
+      }
+
+      case "sol": {
+        const result = createCryptoDeposit(advertiser.id, amountCents, "SOL");
+        return res.json({
+          method: "sol",
+          orderId,
+          address: result.address,
+          amountSol: result.amountCrypto,
+          rate: result.rate,
+          amount: amountUsd,
+        });
+      }
+
+      case "bnbsc": {
+        const result = createCryptoDeposit(advertiser.id, amountCents, "BNB");
+        return res.json({
+          method: "bnbsc",
+          orderId,
+          address: result.address,
+          amountBnb: result.amountCrypto,
+          rate: result.rate,
+          amount: amountUsd,
+        });
+      }
+
       case "yoomoney": {
         const result = createYooMoneyInvoice(advertiser.id, amountUsd);
         if (result) {

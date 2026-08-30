@@ -25,6 +25,9 @@ export const BTC_ADDRESS = process.env.BTC_ADDRESS ?? "";
 export const BTC_FEE_PERCENT = Number(process.env.BTC_FEE_PERCENT ?? "2");
 export const ETH_ADDRESS = process.env.ETH_ADDRESS ?? "";
 export const ETH_FEE_PERCENT = Number(process.env.ETH_FEE_PERCENT ?? "2");
+export const TON_ADDRESS = process.env.TON_ADDRESS ?? "";
+export const SOL_ADDRESS = process.env.SOL_ADDRESS ?? "";
+export const BNB_ADDRESS = process.env.BNB_ADDRESS ?? "";
 export const YOOMONEY_WALLET = process.env.YOOMONEY_WALLET ?? "";
 export const YOOMONEY_NOTIFICATION_SECRET = process.env.YOOMONEY_NOTIFICATION_SECRET ?? "";
 export const YOOKASSA_SHOP_ID = process.env.YOOKASSA_SHOP_ID ?? "";
@@ -34,11 +37,13 @@ export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN ?? "";
 export const TELEGRAM_ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID ?? "";
 
 // Курсы крипты (хардкод, обновлять вручную или через API)
-export const CRYPTO_RATES = {
+export const CRYPTO_RATES: Record<string, number> = {
   USDT: 1,        // 1 USDT ≈ $1
   BTC: 65000,     // 1 BTC ≈ $65,000
   ETH: 3500,      // 1 ETH ≈ $3,500
   TON: 2.5,       // 1 TON ≈ $2.5
+  SOL: 150,       // 1 SOL ≈ $150
+  BNB: 600,       // 1 BNB ≈ $600
 };
 
 if (!JWT_SECRET || JWT_SECRET.length < 32) {

@@ -1,144 +1,807 @@
 <%- include('partials/header') %>
 
-<div class="deposit-page">
-  <div class="form-container">
-    <h1>💰 Пополнение баланса</h1>
-    <p class="subtitle">Внесите средства для создания заданий и VIP-рекламы. Минимальное пополнение — $1</p>
+<style>
+:root {
+  --usdt-color: #26a17b;
+  --btc-color: #f7931a;
+  --eth-color: #627eea;
+  --ton-color: #0088cc;
+  --sol-color: #9945ff;
+  --bnb-color: #f3ba2f;
+  --card-color: #6c5ce7;
+  --yoomoney-color: #fc3c2d;
+}
 
-    <div id="balance-info" class="balance-info">
-      <div class="balance-label">Текущий баланс</div>
-      <div class="balance-value" id="current-balance">Загрузка…</div>
+.page-header {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(6,182,212,0.08) 100%);
+  border-bottom: 1px solid rgba(16,185,129,0.15);
+  padding: 28px 0 24px;
+  margin-bottom: 0;
+}
+
+.page-header .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+.page-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-header p { color: var(--text-dim); font-size: 15px; }
+
+.balance-bar {
+  background: linear-gradient(135deg, #0a0f1e 0%, #0d1526 100%);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin: 24px;
+  max-width: 1052px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.5), transparent);
+}
+
+.balance-bar-left .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.balance-bar-left .value { font-size: 42px; font-weight: 900; color: #10b981; line-height: 1; }
+.balance-bar-left .value small { font-size: 20px; font-weight: 600; }
+.balance-bar-right { text-align: right; }
+.balance-bar-right .stat { font-size: 13px; color: var(--text-dim); }
+.balance-bar-right .stat strong { color: var(--text-bright); }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+/* ─── Левая панель: сумма ─── */
+.left-panel { display: flex; flex-direction: column; gap: 16px; }
+
+.quick-amounts {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.quick-amounts h3 {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.quick-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.quick-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.quick-btn .amount { font-size: 18px; font-weight: 800; color: var(--text-bright); display: block; }
+.quick-btn .label { font-size: 11px; color: var(--text-dim); display: block; margin-top: 2px; }
+.quick-btn:hover { border-color: var(--primary); background: rgba(59,130,246,0.08); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.15); }
+.quick-btn:active { transform: translateY(0); }
+
+.custom-amount-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.custom-amount-box h3 { font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dim);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-with-prefix input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px 14px 36px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-bright);
+  font-family: inherit;
+  transition: border-color 0.2s;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.input-with-prefix input::-webkit-outer-spin-button,
+.input-with-prefix input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.input-with-prefix input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+.usd-label { font-size: 14px; color: var(--text-dim); margin-top: 8px; text-align: right; }
+
+.fee-note {
+  background: rgba(59,130,246,0.06);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.fee-note span { color: var(--primary); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+/* ─── Правая панель: способы оплаты ─── */
+.right-panel h3 {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.methods-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.method-tile {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.method-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.method-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+.method-tile input { display: none; }
+.method-tile input:checked + .tile-content {
+  border-color: currentColor;
+  background: rgba(255,255,255,0.04);
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.tile-content {
+  position: relative;
+  z-index: 1;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 4px;
+  transition: all 0.2s;
+}
+
+/* Crypto tile colors */
+.method-tile[data-method="usdt_trc20"] { border-color: rgba(38,161,123,0.2); }
+.method-tile[data-method="usdt_trc20"]::before { background: radial-gradient(ellipse at top right, rgba(38,161,123,0.15) 0%, transparent 70%); }
+.method-tile[data-method="usdt_trc20"]:hover, .method-tile[data-method="usdt_trc20"] input:checked { border-color: var(--usdt-color); color: var(--usdt-color); }
+
+.method-tile[data-method="btc"] { border-color: rgba(247,147,26,0.2); }
+.method-tile[data-method="btc"]::before { background: radial-gradient(ellipse at top right, rgba(247,147,26,0.15) 0%, transparent 70%); }
+.method-tile[data-method="btc"]:hover, .method-tile[data-method="btc"] input:checked { border-color: var(--btc-color); color: var(--btc-color); }
+
+.method-tile[data-method="eth"] { border-color: rgba(98,126,234,0.2); }
+.method-tile[data-method="eth"]::before { background: radial-gradient(ellipse at top right, rgba(98,126,234,0.15) 0%, transparent 70%); }
+.method-tile[data-method="eth"]:hover, .method-tile[data-method="eth"] input:checked { border-color: var(--eth-color); color: var(--eth-color); }
+
+.method-tile[data-method="ton"] { border-color: rgba(0,136,204,0.2); }
+.method-tile[data-method="ton"]::before { background: radial-gradient(ellipse at top right, rgba(0,136,204,0.15) 0%, transparent 70%); }
+.method-tile[data-method="ton"]:hover, .method-tile[data-method="ton"] input:checked { border-color: var(--ton-color); color: var(--ton-color); }
+
+.method-tile[data-method="sol"] { border-color: rgba(153,69,255,0.2); }
+.method-tile[data-method="sol"]::before { background: radial-gradient(ellipse at top right, rgba(153,69,255,0.15) 0%, transparent 70%); }
+.method-tile[data-method="sol"]:hover, .method-tile[data-method="sol"] input:checked { border-color: var(--sol-color); color: var(--sol-color); }
+
+.method-tile[data-method="bnbsc"] { border-color: rgba(243,186,47,0.2); }
+.method-tile[data-method="bnbsc"]::before { background: radial-gradient(ellipse at top right, rgba(243,186,47,0.15) 0%, transparent 70%); }
+.method-tile[data-method="bnbsc"]:hover, .method-tile[data-method="bnbsc"] input:checked { border-color: var(--bnb-color); color: var(--bnb-color); }
+
+.method-tile[data-method="card"] { border-color: rgba(108,92,231,0.2); }
+.method-tile[data-method="card"]::before { background: radial-gradient(ellipse at top right, rgba(108,92,231,0.15) 0%, transparent 70%); }
+.method-tile[data-method="card"]:hover, .method-tile[data-method="card"] input:checked { border-color: var(--card-color); color: var(--card-color); }
+
+.method-tile[data-method="yoomoney"] { border-color: rgba(252,60,45,0.2); }
+.method-tile[data-method="yoomoney"]::before { background: radial-gradient(ellipse at top right, rgba(252,60,45,0.15) 0%, transparent 70%); }
+.method-tile[data-method="yoomoney"]:hover, .method-tile[data-method="yoomoney"] input:checked { border-color: var(--yoomoney-color); color: var(--yoomoney-color); }
+
+.tile-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+
+.tile-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.tile-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0.15;
+  background: currentColor;
+}
+
+.tile-name { font-size: 14px; font-weight: 700; color: var(--text-bright); line-height: 1.2; }
+.tile-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+.tile-check {
+  margin-left: auto;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.tile-check svg { opacity: 0; transition: opacity 0.2s; }
+input:checked ~ .tile-content .tile-check {
+  border-color: currentColor;
+  background: currentColor;
+}
+input:checked ~ .tile-content .tile-check svg { opacity: 1; }
+
+.tile-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tile-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-dim);
+}
+
+.tile-tag.speed { background: rgba(16,185,129,0.12); color: var(--success); }
+.tile-tag.soon { background: rgba(245,158,11,0.12); color: #f59e0b; }
+
+/* Кнопка оплаты */
+.pay-section {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pay-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+
+.pay-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+.pay-btn:active { transform: translateY(0); }
+.pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ─── Step 2: адрес ─── */
+.step2 { display: none; }
+.step2.active { display: block; }
+
+.step2-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 1052px;
+  margin: 0 auto 24px;
+}
+
+.step2-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+
+.step2-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.address-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.address-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.address-value { font-family: monospace; font-size: 14px; color: var(--text-bright); word-break: break-all; line-height: 1.5; }
+
+.amount-to-pay {
+  background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(168,85,247,0.08));
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.amount-to-pay .label { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+.amount-to-pay .value { font-size: 30px; font-weight: 900; color: var(--primary); }
+.amount-to-pay .equiv { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+.network-note {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #f59e0b;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.network-note span { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.copy-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+.confirm-section { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+.confirm-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+.confirm-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Success ─── */
+.success-box {
+  text-align: center;
+  padding: 48px 24px;
+}
+.success-icon { font-size: 72px; margin-bottom: 16px; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-box h2 { color: var(--success); font-size: 28px; margin-bottom: 8px; }
+.success-box p { color: var(--text-dim); }
+
+/* ─── Coming soon badge ─── */
+.coming-soon-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: rgba(245,158,11,0.2);
+  color: #f59e0b;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.method-tile.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.method-tile.disabled:hover { transform: none; box-shadow: none; }
+
+/* ─── Info banner ─── */
+.info-banner {
+  background: linear-gradient(135deg, rgba(6,182,212,0.08), rgba(59,130,246,0.06));
+  border: 1px solid rgba(6,182,212,0.15);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 0 24px 24px;
+  max-width: 1052px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.info-banner .icon { font-size: 20px; flex-shrink: 0; }
+.info-banner p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+.info-banner strong { color: var(--text-bright); }
+
+@media (max-width: 768px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .methods-grid { grid-template-columns: 1fr 1fr; }
+  .balance-bar { padding: 18px 20px; }
+  .balance-bar-left .value { font-size: 32px; }
+  .info-banner { margin: 16px; }
+}
+
+@media (max-width: 480px) {
+  .methods-grid { grid-template-columns: 1fr; }
+  .quick-btn-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+
+<!-- Balance + Header -->
+<div class="page-header">
+  <div class="page-header">
+    <div class="container">
+      <h1>💰 Пополнение баланса</h1>
+      <p>Выберите способ оплаты и внесите средства для запуска заданий и VIP-рекламы</p>
     </div>
+  </div>
+</div>
 
-    <!-- Шаг 1: выбор суммы и метода -->
-    <div id="step1">
-      <form id="deposit-form" class="deposit-form">
-        <div class="form-group">
-          <label>Сумма пополнения (USD)</label>
-          <div class="amount-grid">
-            <button type="button" class="amount-btn" data-amount="5">$5</button>
-            <button type="button" class="amount-btn" data-amount="10">$10</button>
-            <button type="button" class="amount-btn" data-amount="25">$25</button>
-            <button type="button" class="amount-btn" data-amount="50">$50</button>
-            <button type="button" class="amount-btn" data-amount="100">$100</button>
-            <button type="button" class="amount-btn" data-amount="500">$500</button>
-          </div>
-          <input type="number" name="amount" id="amount-input" min="1" step="1" placeholder="Введите сумму" required />
-        </div>
+<!-- Balance bar -->
+<div class="balance-bar">
+  <div class="balance-bar-left">
+    <div class="label">Текущий баланс</div>
+    <div class="value" id="current-balance">—</div>
+  </div>
+  <div class="balance-bar-right">
+    <div class="stat">Всего потрачено: <strong id="total-spent">$0.00</strong></div>
+    <div class="stat" style="margin-top:4px;">Активных заданий: <strong id="active-tasks">0</strong></div>
+  </div>
+</div>
 
-        <div class="form-group">
-          <label>Способ оплаты</label>
-          <div class="payment-methods">
-            <label class="payment-method">
-              <input type="radio" name="paymentMethod" value="card" checked />
-              <div class="method-card">
-                <div class="method-icon">💳</div>
-                <div class="method-name">Банковская карта</div>
-                <div class="method-desc">Visa, Mastercard, МИР</div>
-                <div class="method-badge">Мгновенно</div>
-              </div>
-            </label>
-            <label class="payment-method">
-              <input type="radio" name="paymentMethod" value="usdt_trc20" />
-              <div class="method-card">
-                <div class="method-icon">🪙</div>
-                <div class="method-name">USDT TRC20</div>
-                <div class="method-desc">Сеть Tron</div>
-                <div class="method-badge">1–5 мин</div>
-              </div>
-            </label>
-            <label class="payment-method">
-              <input type="radio" name="paymentMethod" value="btc" />
-              <div class="method-card">
-                <div class="method-icon">₿</div>
-                <div class="method-name">Bitcoin (BTC)</div>
-                <div class="method-desc">Сеть Bitcoin</div>
-                <div class="method-badge">10–30 мин</div>
-              </div>
-            </label>
-            <label class="payment-method">
-              <input type="radio" name="paymentMethod" value="eth" />
-              <div class="method-card">
-                <div class="method-icon">Ξ</div>
-                <div class="method-name">Ethereum (ETH)</div>
-                <div class="method-desc">Сеть ERC-20</div>
-                <div class="method-badge">5–15 мин</div>
-              </div>
-            </label>
-            <label class="payment-method">
-              <input type="radio" name="paymentMethod" value="yoomoney" />
-              <div class="method-card">
-                <div class="method-icon">💴</div>
-                <div class="method-name">ЮMoney</div>
-                <div class="method-desc">Электронные деньги</div>
-                <div class="method-badge">Мгновенно</div>
-              </div>
-            </label>
-          </div>
-        </div>
+<!-- Info banner -->
+<div class="info-banner">
+  <div class="icon">💡</div>
+  <p>Средства зачисляются на баланс рекламодателя. <strong>Минимальное пополнение — $1.</strong> Все транзакции в криптовалюте проверяются автоматически через 1–2 минуты после подтверждения сети.</p>
+</div>
 
-        <div class="form-actions">
-          <a href="/advertiser" class="btn btn-ghost">← Назад</a>
-          <button type="submit" class="btn btn-primary btn-lg" id="payBtn">💸 Оплатить</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Шаг 2: оплата картой — редирект -->
-    <div id="step-card" style="display:none;" class="payment-step">
-      <div class="result-icon">🔄</div>
-      <h2>Перенаправляем на оплату…</h2>
-      <p>Откроется страница ЮKassa для ввода данных карты.</p>
-      <button class="btn btn-ghost" onclick="location.reload()">Отмена</button>
-    </div>
-
-    <!-- Шаг 2: крипта — данные для перевода -->
-    <div id="step-crypto" style="display:none;" class="payment-step">
-      <div class="crypto-info">
-        <h2 id="crypto-title">🪙 Оплата USDT (TRC20)</h2>
-        <p class="crypto-note">⚠️ Отправьте ровно указанную сумму на адрес ниже. Минимальная сумма — $1.</p>
-
-        <div class="crypto-amount-box">
-          <div class="crypto-amount-label">Сумма к оплате:</div>
-          <div class="crypto-amount-value" id="crypto-amount">—</div>
-        </div>
-
-        <div class="crypto-address-box">
-          <div class="crypto-address-label">Адрес кошелька (скопируйте):</div>
-          <div class="crypto-address" id="crypto-address">—</div>
-          <button class="btn btn-ghost btn-sm" onclick="copyAddress()">📋 Скопировать</button>
-        </div>
-
-        <div class="crypto-memo-box" id="memo-box" style="display:none;">
-          <div class="crypto-address-label">Memo / Comment (обязательно!):</div>
-          <div class="crypto-address" id="crypto-memo" style="color: var(--primary);">—</div>
-          <button class="btn btn-ghost btn-sm" onclick="copyMemo()">📋 Скопировать</button>
-        </div>
-
-        <div class="crypto-warning">
-          <p>⏳ После отправки средств нажмите кнопку ниже. Баланс зачислится автоматически после подтверждения сети.</p>
-        </div>
-
-        <button class="btn btn-primary btn-lg btn-block" onclick="checkCryptoPayment()">✅ Я отправил(а), проверить зачисление</button>
-        <a href="/advertiser" class="btn btn-ghost btn-block" style="margin-top:8px;">← Вернуться в кабинет</a>
+<!-- Main grid -->
+<div class="main-grid" id="main-grid">
+  <!-- Left: amount -->
+  <div class="left-panel">
+    <div class="quick-amounts">
+      <h3>Быстрый выбор</h3>
+      <div class="quick-btn-grid">
+        <button type="button" class="quick-btn" data-amount="5"><span class="amount">$5</span><span class="label">Минимум</span></button>
+        <button type="button" class="quick-btn" data-amount="10"><span class="amount">$10</span><span class="label">Популярный</span></button>
+        <button type="button" class="quick-btn" data-amount="25"><span class="amount">$25</span><span class="label">Оптимальный</span></button>
+        <button type="button" class="quick-btn" data-amount="50"><span class="amount">$50</span><span class="label">Выгодный</span></button>
+        <button type="button" class="quick-btn" data-amount="100"><span class="amount">$100</span><span class="label">Премиум</span></button>
+        <button type="button" class="quick-btn" data-amount="500"><span class="amount">$500</span><span class="label">Максимум</span></button>
       </div>
     </div>
 
-    <!-- Шаг 2: ЮMoney — ссылка на оплату -->
-    <div id="step-yoomoney" style="display:none;" class="payment-step">
-      <div class="result-icon">💴</div>
-      <h2>ЮMoney</h2>
-      <p>Нажмите кнопку ниже для оплаты через ЮMoney</p>
-      <a href="#" id="yoomoney-link" class="btn btn-primary btn-lg" target="_blank">💴 Оплатить через ЮMoney →</a>
-      <a href="/advertiser" class="btn btn-ghost btn-block" style="margin-top:8px;">← Вернуться в кабинет</a>
+    <div class="custom-amount-box">
+      <h3>Своя сумма</h3>
+      <div class="input-with-prefix">
+        <span class="input-prefix">$</span>
+        <input type="number" id="amount-input" min="1" max="10000" step="1" placeholder="0" value="10" />
+      </div>
+      <div class="usd-label" id="usd-label">≈ 10.00 USD</div>
+      <div class="fee-note">
+        <span>⚡</span>
+        <div>Без скрытых комиссий. Вы платите ровно столько, сколько вводите.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: payment methods -->
+  <div class="right-panel">
+    <h3>Способ оплаты</h3>
+    <div class="methods-grid">
+
+      <!-- USDT TRC20 -->
+      <label class="method-tile" data-method="usdt_trc20">
+        <input type="radio" name="paymentMethod" value="usdt_trc20" checked />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">🪙</div>
+            <div>
+              <div class="tile-name">USDT</div>
+              <div class="tile-sub">TRC-20 (Tron)</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag speed">1–5 мин</span>
+            <span class="tile-tag">$0 комиссии</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- Bitcoin -->
+      <label class="method-tile" data-method="btc">
+        <input type="radio" name="paymentMethod" value="btc" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">₿</div>
+            <div>
+              <div class="tile-name">Bitcoin</div>
+              <div class="tile-sub">Сеть Bitcoin</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag">10–30 мин</span>
+            <span class="tile-tag">+2% комиссия</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- Ethereum -->
+      <label class="method-tile" data-method="eth">
+        <input type="radio" name="paymentMethod" value="eth" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">Ξ</div>
+            <div>
+              <div class="tile-name">Ethereum</div>
+              <div class="tile-sub">ERC-20</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag">5–15 мин</span>
+            <span class="tile-tag">+2% комиссия</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- TON -->
+      <label class="method-tile" data-method="ton">
+        <input type="radio" name="paymentMethod" value="ton" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">🟢</div>
+            <div>
+              <div class="tile-name">Toncoin</div>
+              <div class="tile-sub">Сеть TON</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag speed">1–3 мин</span>
+            <span class="tile-tag">$0 комиссии</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- Solana -->
+      <label class="method-tile" data-method="sol">
+        <input type="radio" name="paymentMethod" value="sol" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">◎</div>
+            <div>
+              <div class="tile-name">Solana</div>
+              <div class="tile-sub">Сеть Solana</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag speed">~1 мин</span>
+            <span class="tile-tag">$0 комиссии</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- BNB Smart Chain -->
+      <label class="method-tile" data-method="bnbsc">
+        <input type="radio" name="paymentMethod" value="bnbsc" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">🔶</div>
+            <div>
+              <div class="tile-name">BNB (BSC)</div>
+              <div class="tile-sub">BEP-20</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag speed">1–3 мин</span>
+            <span class="tile-tag">$0 комиссии</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- Bank Card -->
+      <label class="method-tile" data-method="card">
+        <input type="radio" name="paymentMethod" value="card" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">💳</div>
+            <div>
+              <div class="tile-name">Банковская карта</div>
+              <div class="tile-sub">Visa, Mastercard, МИР</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag speed">Мгновенно</span>
+            <span class="tile-tag soon">Россия</span>
+          </div>
+        </div>
+      </label>
+
+      <!-- ЮMoney -->
+      <label class="method-tile" data-method="yoomoney">
+        <input type="radio" name="paymentMethod" value="yoomoney" />
+        <div class="tile-content">
+          <div class="tile-top">
+            <div class="tile-icon">💴</div>
+            <div>
+              <div class="tile-name">ЮMoney</div>
+              <div class="tile-sub">Электронные деньги</div>
+            </div>
+            <div class="tile-check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="tile-tags">
+            <span class="tile-tag speed">Мгновенно</span>
+            <span class="tile-tag soon">Россия</span>
+          </div>
+        </div>
+      </label>
+
     </div>
 
-    <!-- Шаг 3: результат -->
-    <div id="step-success" style="display:none;" class="payment-step">
-      <div class="result-icon">✅</div>
+    <div class="pay-section">
+      <button type="button" class="pay-btn" id="pay-btn">
+        <span>💸</span>
+        <span id="pay-btn-text">Пополнить на <strong id="pay-amount">$10</strong></span>
+      </button>
+      <a href="/advertiser" class="copy-btn" style="text-align:center; text-decoration:none;">← Назад в кабинет</a>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: address display -->
+<div class="step2" id="step2">
+  <div class="step2-card">
+    <div class="step2-header">
+      <div class="step2-icon" id="step2-icon">🪙</div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:var(--text-bright);" id="step2-title">Оплата USDT (TRC-20)</div>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:2px;">Отправьте ровно указанную сумму на адрес ниже</div>
+      </div>
+    </div>
+
+    <div class="amount-to-pay">
+      <div class="label">Сумма к оплате</div>
+      <div class="value" id="step2-amount">—</div>
+      <div class="equiv" id="step2-equiv">≈ — USD</div>
+    </div>
+
+    <div class="address-box">
+      <div class="address-label">Адрес кошелька</div>
+      <div class="address-value" id="step2-address">—</div>
+    </div>
+
+    <button class="copy-btn" id="copy-address-btn" style="margin-bottom:12px;">
+      📋 Скопировать адрес
+    </button>
+
+    <div class="network-note" id="network-note">
+      <span>⚠️</span>
+      <div>Внимание: отправляйте строго в указанной сети. Отправка в другой сети приведёт к потере средств.</div>
+    </div>
+
+    <div class="confirm-section">
+      <button class="confirm-btn" id="confirm-btn" onclick="checkPayment()">
+        ✅ Я отправил(а) — проверить зачисление
+      </button>
+      <button class="copy-btn" style="text-align:center;" onclick="backToStep1()">← Выбрать другой способ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="step2" id="success-screen">
+  <div class="step2-card">
+    <div class="success-box">
+      <div class="success-icon">✅</div>
       <h2>Баланс пополнен!</h2>
-      <p id="success-message">Средства зачислены на ваш баланс.</p>
-      <a href="/advertiser" class="btn btn-primary btn-lg">Вернуться в кабинет</a>
+      <p id="success-msg">Средства зачислены на ваш счёт. Можете создавать задания!</p>
+      <div style="margin-top:24px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <a href="/advertiser" class="pay-btn" style="text-decoration:none; display:inline-flex; max-width:240px;">← В кабинет</a>
+        <button class="copy-btn" onclick="backToStep1()" style="font-size:14px; padding:12px 20px;">+ Ещё пополнение</button>
+      </div>
     </div>
   </div>
 </div>
@@ -146,155 +809,192 @@
 <script>
 let currentOrderId = '';
 let currentMethod = '';
-let currentAmount = '';
+let currentAmount = 10;
+let step2Data = {};
 
 async function loadBalance() {
-  const res = await fetch('/api/advertiser/me', {
-    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-  });
-  const data = await res.json();
-  if (data.isAdvertiser) {
-    document.getElementById('current-balance').textContent = '$' + (data.advertiser.balance / 100).toFixed(2);
-  }
+  try {
+    const res = await fetch('/api/advertiser/me', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const data = await res.json();
+    if (data.isAdvertiser) {
+      document.getElementById('current-balance').textContent =
+        '$' + (data.advertiser.balance / 100).toFixed(2);
+      document.getElementById('total-spent').textContent =
+        '$' + (data.advertiser.totalSpent / 100).toFixed(2);
+    }
+  } catch(e) { console.error(e); }
 }
-loadBalance();
 
-document.querySelectorAll('.amount-btn').forEach(btn => {
+async function loadStats() {
+  try {
+    const res = await fetch('/api/advertiser/stats', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const data = await res.json();
+    if (data.stats) {
+      document.getElementById('active-tasks').textContent = data.stats.activeTasks || 0;
+    }
+  } catch(e) {}
+}
+
+loadBalance();
+loadStats();
+
+// Quick amount buttons
+document.querySelectorAll('.quick-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.getElementById('amount-input').value = btn.dataset.amount;
+    const val = btn.dataset.amount;
+    document.getElementById('amount-input').value = val;
+    updatePayBtn(val);
   });
 });
 
-document.getElementById('deposit-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target));
-  if (!data.amount || Number(data.amount) < 1) {
+function updatePayBtn(amount) {
+  currentAmount = Number(amount) || 0;
+  document.getElementById('pay-amount').textContent = '$' + currentAmount.toFixed(0);
+  document.getElementById('usd-label').textContent = '≈ ' + currentAmount.toFixed(2) + ' USD';
+}
+
+document.getElementById('amount-input').addEventListener('input', (e) => {
+  updatePayBtn(e.target.value);
+});
+
+updatePayBtn(10);
+
+// Pay button
+document.getElementById('pay-btn').addEventListener('click', async () => {
+  const amount = Number(document.getElementById('amount-input').value);
+  if (!amount || amount < 1) {
     alert('Минимальная сумма — $1');
     return;
   }
-  currentMethod = data.paymentMethod;
-  currentAmount = data.amount;
+  currentAmount = amount;
+  const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+  if (!method) { alert('Выберите способ оплаты'); return; }
 
-  const res = await fetch('/api/payments/deposit', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
-    body: JSON.stringify(data),
-  });
-  const json = await res.json();
+  currentMethod = method;
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Создаём платёж…';
 
-  if (!res.ok) {
-    alert(json.error || 'Ошибка');
-    return;
-  }
+  try {
+    const res = await fetch('/api/payments/deposit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+      body: JSON.stringify({ amount, paymentMethod: method }),
+    });
+    const json = await res.json();
 
-  currentOrderId = json.orderId;
-
-  if (currentMethod === 'card') {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step-card').style.display = 'block';
-    window.location.href = json.confirmationUrl;
-  } else if (currentMethod === 'usdt_trc20') {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step-crypto').style.display = 'block';
-    document.getElementById('crypto-title').textContent = '🪙 Оплата USDT (TRC20)';
-    document.getElementById('crypto-amount').textContent = json.amountUsdt + ' USDT';
-    document.getElementById('crypto-address').textContent = json.address;
-    window.cryptoAddress = json.address;
-    if (json.memo) {
-      document.getElementById('memo-box').style.display = 'block';
-      document.getElementById('crypto-memo').textContent = json.memo;
-      window.cryptoMemo = json.memo;
+    if (!res.ok) {
+      alert(json.error || 'Ошибка при создании платежа');
+      btn.disabled = false;
+      btn.innerHTML = '<span>💸</span><span id="pay-btn-text">Пополнить на <strong id="pay-amount">$' + currentAmount + '</strong></span>';
+      return;
     }
-  } else if (currentMethod === 'btc') {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step-crypto').style.display = 'block';
-    document.getElementById('crypto-title').textContent = '₿ Оплата Bitcoin (BTC)';
-    document.getElementById('crypto-amount').textContent = json.amountBtc + ' BTC';
-    document.getElementById('crypto-address').textContent = json.address;
-    document.getElementById('crypto-address').dataset.address = json.address;
-    window.cryptoAddress = json.address;
-    document.getElementById('memo-box').style.display = 'none';
-  } else if (currentMethod === 'eth') {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step-crypto').style.display = 'block';
-    document.getElementById('crypto-title').textContent = 'Ξ Оплата Ethereum (ETH)';
-    document.getElementById('crypto-amount').textContent = json.amountEth + ' ETH';
-    document.getElementById('crypto-address').textContent = json.address;
-    window.cryptoAddress = json.address;
-    document.getElementById('memo-box').style.display = 'none';
-  } else if (currentMethod === 'yoomoney') {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step-yoomoney').style.display = 'block';
-    document.getElementById('yoomoney-link').href = json.invoiceUrl;
+
+    currentOrderId = json.orderId;
+
+    if (method === 'card') {
+      window.location.href = json.confirmationUrl;
+      return;
+    }
+
+    if (method === 'yoomoney') {
+      window.location.href = json.invoiceUrl;
+      return;
+    }
+
+    // Crypto: show step 2
+    showStep2(json);
+  } catch(e) {
+    alert('Ошибка сети: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>💸</span><span id="pay-btn-text">Пополнить на <strong id="pay-amount">$' + currentAmount + '</strong></span>';
   }
 });
 
-async function checkCryptoPayment() {
-  const res = await fetch('/api/payments/check/' + currentOrderId, {
-    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+const CRYPTO_META = {
+  usdt_trc20: { icon: '🪙', title: 'Оплата USDT (TRC-20)', color: '#26a17b', note: 'Отправьте ровно указанную сумму USDT на адрес ниже. После подтверждения сети нажмите «Проверить зачисление».' },
+  btc:       { icon: '₿',  title: 'Оплата Bitcoin (BTC)', color: '#f7931a', note: 'Отправьте ровно указанное количество BTC. Оплата поступит после 1 подтверждения сети (~10-30 мин).' },
+  eth:       { icon: 'Ξ',  title: 'Оплата Ethereum (ERC-20)', color: '#627eea', note: 'Отправьте ETH на адрес ниже. Оплата поступит после подтверждения сети (~5-15 мин).' },
+  ton:       { icon: '🟢', title: 'Оплата Toncoin (TON)', color: '#0088cc', note: 'Отправьте TON на адрес ниже. Оплата поступит мгновенно.' },
+  sol:       { icon: '◎',  title: 'Оплата Solana (SOL)', color: '#9945ff', note: 'Отправьте SOL на адрес ниже. Оплата поступит мгновенно.' },
+  bnbsc:     { icon: '🔶', title: 'Оплата BNB (BSC)', color: '#f3ba2f', note: 'Отправьте BNB на адрес ниже. Оплата поступит мгновенно.' },
+};
+
+function showStep2(data) {
+  document.getElementById('main-grid').style.display = 'none';
+  document.getElementById('step2').classList.add('active');
+  document.getElementById('success-screen').classList.remove('active');
+
+  const meta = CRYPTO_META[currentMethod] || CRYPTO_META.usdt_trc20;
+
+  document.getElementById('step2-icon').textContent = meta.icon;
+  document.getElementById('step2-title').textContent = meta.title;
+  document.getElementById('step2-address').textContent = data.address || '—';
+
+  const cryptoAmount = data.amountUsdt || data.amountBtc || data.amountEth || data.amountTon || data.amountSol || data.amountBnb || '—';
+  const label = currentMethod === 'usdt_trc20' ? 'USDT'
+    : currentMethod === 'btc' ? 'BTC'
+    : currentMethod === 'eth' ? 'ETH'
+    : currentMethod === 'ton' ? 'TON'
+    : currentMethod === 'sol' ? 'SOL'
+    : 'BNB';
+
+  document.getElementById('step2-amount').textContent = cryptoAmount + ' ' + label;
+  document.getElementById('step2-equiv').textContent = '≈ $' + currentAmount.toFixed(2) + ' USD';
+
+  const noteEl = document.getElementById('network-note');
+  noteEl.innerHTML = '<span>⚠️</span><div>' + meta.note + '</div>';
+
+  step2Data = data;
+}
+
+function backToStep1() {
+  document.getElementById('main-grid').style.display = '';
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('success-screen').classList.remove('active');
+}
+
+document.getElementById('copy-address-btn').addEventListener('click', () => {
+  const addr = document.getElementById('step2-address').textContent;
+  navigator.clipboard.writeText(addr).then(() => {
+    const btn = document.getElementById('copy-address-btn');
+    btn.textContent = '✅ Скопировано!';
+    setTimeout(() => { btn.textContent = '📋 Скопировать адрес'; }, 2000);
   });
-  const json = await res.json();
-  if (json.status === 'confirmed') {
-    document.getElementById('step-crypto').style.display = 'none';
-    document.getElementById('step-success').style.display = 'block';
-    document.getElementById('success-message').textContent =
-      'Зачислено $' + (json.amount / 100).toFixed(2) + '. Можете создавать задания!';
-    loadBalance();
-  } else {
-    alert('Средства ещё не поступили. Проверьте отправку и подождите 1-2 минуты. Если отправляли на другой адрес — обратитесь в поддержку.');
+});
+
+async function checkPayment() {
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Проверяем blockchain…';
+
+  try {
+    const res = await fetch('/api/payments/check/' + currentOrderId, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const json = await res.json();
+
+    if (json.status === 'confirmed') {
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('success-screen').classList.add('active');
+      document.getElementById('success-msg').textContent =
+        'Зачислено $' + (json.amount / 100).toFixed(2) + '. Можете создавать задания и покупать VIP-рекламу!';
+      loadBalance();
+    } else {
+      alert('Средства ещё не поступили. Проверьте:\n1) Отправлена ли сумма точно\n2) Выбрана ли правильная сеть\n3) Подождите 1-2 минуты после отправки\n\nЕсли отправляли — нажмите «Проверить» ещё раз.');
+    }
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✅ Я отправил(а) — проверить зачисление';
   }
 }
-
-function copyAddress() {
-  navigator.clipboard.writeText(window.cryptoAddress || '');
-  alert('Адрес скопирован!');
-}
-function copyMemo() {
-  navigator.clipboard.writeText(window.cryptoMemo || '');
-  alert('Memo скопирован!');
-}
 </script>
-
-<style>
-.deposit-page { display: flex; justify-content: center; padding: 40px 20px; }
-.form-container { width: 100%; max-width: 700px; }
-.form-container h1 { color: var(--text-bright); margin-bottom: 8px; }
-.subtitle { color: var(--text-dim); margin-bottom: 24px; }
-.balance-info { background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(6,182,212,.1)); border: 1px solid rgba(16,185,129,.3); border-radius: var(--radius); padding: 24px; text-align: center; margin-bottom: 24px; }
-.balance-label { color: var(--text-dim); font-size: 13px; margin-bottom: 6px; }
-.balance-value { font-size: 36px; font-weight: 800; color: var(--success); }
-.deposit-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column; gap: 20px; }
-.amount-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
-.amount-btn { padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s; }
-.amount-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(59,130,246,.05); }
-.payment-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
-.payment-method { cursor: pointer; }
-.payment-method input { display: none; }
-.payment-method input:checked + .method-card { border-color: var(--primary); background: rgba(59,130,246,.1); box-shadow: 0 0 0 2px rgba(59,130,246,.3); }
-.method-card { padding: 16px 12px; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); text-align: center; transition: all .2s; }
-.method-icon { font-size: 28px; margin-bottom: 6px; }
-.method-name { font-weight: 700; color: var(--text-bright); font-size: 13px; }
-.method-desc { color: var(--text-dim); font-size: 11px; margin-top: 4px; }
-.method-badge { margin-top: 6px; display: inline-block; padding: 2px 8px; background: rgba(16,185,129,.15); color: var(--success); border-radius: 100px; font-size: 11px; font-weight: 700; }
-.form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-.payment-step { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.result-icon { font-size: 64px; }
-.payment-step h2 { color: var(--text-bright); font-size: 28px; }
-.payment-step p { color: var(--text-dim); max-width: 400px; }
-.crypto-info { width: 100%; display: flex; flex-direction: column; gap: 20px; }
-.crypto-note { color: #ef4444; font-size: 14px; text-align: center; }
-.crypto-amount-box { background: linear-gradient(135deg, rgba(59,130,246,.1), rgba(168,85,247,.1)); border: 2px solid rgba(59,130,246,.3); border-radius: var(--radius); padding: 24px; text-align: center; }
-.crypto-amount-label { color: var(--text-dim); font-size: 13px; margin-bottom: 8px; }
-.crypto-amount-value { font-size: 36px; font-weight: 900; color: var(--primary); }
-.crypto-address-box { background: rgba(168,85,247,.05); border: 1px solid rgba(168,85,247,.2); border-radius: var(--radius); padding: 20px; text-align: center; }
-.crypto-address-label { color: var(--text-dim); font-size: 13px; margin-bottom: 8px; }
-.crypto-address { font-family: monospace; font-size: 15px; color: var(--text-bright); word-break: break-all; margin-bottom: 8px; background: rgba(0,0,0,.05); padding: 12px; border-radius: var(--radius-sm); }
-.crypto-memo-box { background: rgba(236,72,153,.05); border: 1px solid rgba(236,72,153,.2); border-radius: var(--radius); padding: 20px; text-align: center; }
-.crypto-warning { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); border-radius: var(--radius-sm); padding: 12px; color: #f59e0b; font-size: 13px; }
-@media (max-width: 600px) {
-  .amount-grid { grid-template-columns: repeat(3, 1fr); }
-  .payment-methods { grid-template-columns: repeat(2, 1fr); }
-}
-</style>
 
 <%- include('partials/footer') %>
