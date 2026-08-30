@@ -1,8 +1,8 @@
 :root {
-  --bg: #0a0118;
-  --bg-elevated: #1a0b2e;
+  --bg: #ffffff;
+  --bg-elevated: #faf5ff;
   --bg-card: #ffffff;
-  --border: rgba(255,255,255,0.1);
+  --border: #e9d5ff;
   --text: #1e1b3a;
   --text-dim: #6b7280;
   --text-bright: #0f0524;
@@ -389,7 +389,7 @@ body {
 #preloader {
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, #0a0118 0%, #1a0b2e 50%, #2d1b4e 100%);
+  background: #faf5ff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -422,7 +422,7 @@ body {
   100% { background-position: 0% 50%; }
 }
 .preloader-subtitle {
-  color: rgba(255,255,255,0.7);
+  color: #6b7280;
   font-size: 18px;
   margin-bottom: 40px;
   letter-spacing: 4px;
@@ -430,7 +430,7 @@ body {
 }
 .preloader-bar {
   width: 300px; height: 6px;
-  background: rgba(255,255,255,0.1);
+  background: #e9d5ff;
   border-radius: 3px;
   overflow: hidden;
   position: relative;
@@ -450,7 +450,7 @@ body {
   100% { background-position: -200% 0; }
 }
 .preloader-text {
-  color: rgba(255,255,255,0.5);
+  color: var(--text-dim);
   margin-top: 24px;
   font-size: 14px;
 }
@@ -465,11 +465,11 @@ body {
 .preloader-stat-value {
   font-size: 24px;
   font-weight: 900;
-  color: white;
+  color: var(--text-bright);
 }
 .preloader-stat-label {
   font-size: 12px;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-dim);
   margin-top: 4px;
 }
 #preloader.hidden {

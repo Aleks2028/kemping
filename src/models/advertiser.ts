@@ -87,17 +87,17 @@ export const AdvertiserModel = {
     const taskRows = db.prepare(`
       SELECT
         COUNT(*) as total,
-        SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
-        SUM(CASE WHEN status = 'pending_review' THEN 1 ELSE 0 END) as pending,
-        SUM(CASE WHEN status = 'finished' THEN 1 ELSE 0 END) as finished
+        SUM(CASE WHEN tasks.status = 'active' THEN 1 ELSE 0 END) as active,
+        SUM(CASE WHEN tasks.status = 'pending_review' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN tasks.status = 'finished' THEN 1 ELSE 0 END) as finished
       FROM tasks WHERE advertiser_id = ?
     `).get(advertiserId) as any;
 
     const completionRows = db.prepare(`
       SELECT
         COUNT(*) as total_completions,
-        SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+        SUM(CASE WHEN tc.status = 'approved' THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN tc.status = 'pending' THEN 1 ELSE 0 END) as pending
       FROM task_completions tc
       JOIN tasks t ON t.id = tc.task_id
       WHERE t.advertiser_id = ?
