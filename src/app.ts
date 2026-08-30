@@ -143,6 +143,33 @@ app.listen(PORT, () => {
   } catch (e) {
     console.warn("⚠️ Не удалось создать админа:", e);
   }
+
+  // Гарантируем существование рекламодателя
+  try {
+    const { UserModel } = require("./models/user");
+    const { AdvertiserModel } = require("./models/advertiser");
+    let advUser = UserModel.getByUsername("advertiser");
+    if (!advUser) {
+      advUser = UserModel.create({
+        username: "advertiser",
+        email: "ads@kemping.ru",
+        password: "ads123456",
+      });
+    }
+    let adv = AdvertiserModel.getByUserId(advUser.id);
+    if (!adv) {
+      adv = AdvertiserModel.create({
+        userId: advUser.id,
+        companyName: "Kemping Company",
+        contact: "@kemping_ads",
+      });
+    }
+    // Пополняем баланс на $1000 (100000 центов)
+    AdvertiserModel.deposit(adv.id, 100000);
+    console.log(`📢 Рекламодатель готов: advertiser / ads123456 (баланс $1000)`);
+  } catch (e) {
+    console.warn("⚠️ Не удалось создать рекламодателя:", e);
+  }
 });
 
 export default app;
