@@ -43,6 +43,20 @@ app.get("/", (_req, res) => {
   res.render("index", { title: "Kemping — Зарабатывай на заданиях" });
 });
 
+// Перехватчик токена из URL — ставит cookie и редиректит на /tasks
+app.get("/auth-callback", (req, res) => {
+  const token = req.query.token as string;
+  if (token) {
+    res.cookie("token", token, {
+      httpOnly: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+  }
+  res.redirect("/tasks");
+});
+
 // Регистрация
 app.get("/register", (_req, res) => {
   res.render("register", { title: "Регистрация" });

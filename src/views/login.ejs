@@ -43,10 +43,9 @@
       if (res.ok) {
         try {
           localStorage.setItem('token', json.token);
-        } catch (e) {
-          document.cookie = 'token=' + json.token + '; path=/; max-age=604800';
-        }
-        window.location.href = '/tasks?token=' + encodeURIComponent(json.token);
+        } catch (e) {}
+        // Перенаправляем на callback-роут, который поставит cookie и отправит на /tasks
+        window.location.href = '/auth-callback?token=' + encodeURIComponent(json.token);
       } else {
         errBox.textContent = json.error || 'Ошибка входа';
         errBox.style.display = 'block';

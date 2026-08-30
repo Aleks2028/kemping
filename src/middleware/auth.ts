@@ -36,6 +36,11 @@ export function authOptional(req: Request, res: Response, next: NextFunction) {
     if (match) token = match[1];
   }
 
+  // 3. URL query parameter (?token=xxx)
+  if (!token) {
+    token = (req.query.token as string) || "";
+  }
+
   if (!token) return next();
 
   try {

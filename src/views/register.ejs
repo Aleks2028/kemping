@@ -47,7 +47,7 @@
     const json = await res.json();
     if (res.ok) {
       localStorage.setItem('token', json.token);
-      window.location.href = '/tasks';
+      window.location.href = '/auth-callback?token=' + encodeURIComponent(json.token);
     } else {
       alert(json.error || 'Ошибка регистрации');
     }
