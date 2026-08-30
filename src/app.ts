@@ -164,9 +164,7 @@ app.listen(PORT, () => {
         contact: "@kemping_ads",
       });
     }
-    // Пополняем баланс на $100 (10000 центов) для тестов
-    AdvertiserModel.deposit(adv.id, 10000);
-    console.log(`📢 Рекламодатель готов: advertiser / ads123456 (баланс $100)`);
+    console.log(`📢 Рекламодатель готов: advertiser / ads123456`);
   } catch (e) {
     console.warn("⚠️ Не удалось создать рекламодателя:", e);
   }
