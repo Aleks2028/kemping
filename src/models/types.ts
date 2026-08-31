@@ -83,3 +83,45 @@ export interface Advertiser {
   totalSpent: number;
   createdAt: number;
 }
+
+export interface VipPackage {
+  id: string;
+  name: string;
+  description: string;
+  priceCents: number;
+  referralBonusPercent: number;
+  dailyTasksBonus: number;
+  minWithdrawalCents?: number;
+  color: string;
+  icon: string;
+  sortOrder: number;
+  createdAt: number;
+}
+
+export interface VipPurchase {
+  id: string;
+  userId: string;
+  packageId: string;
+  priceCents: number;
+  status: 'active' | 'expired' | 'cancelled';
+  startedAt: number;
+  expiresAt: number;
+  createdAt: number;
+}
+
+export interface FaucetClaim {
+  id: string;
+  userId: string;
+  amountCents: number;
+  ipAddress?: string;
+  createdAt: number;
+}
+
+export interface FaucetSettings {
+  id: string;
+  minAmountCents: number;
+  maxAmountCents: number;
+  cooldownSeconds: number;
+  isActive: boolean;
+  createdAt: number;
+}

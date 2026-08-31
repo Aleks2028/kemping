@@ -9,7 +9,70 @@ import { UserModel } from "../models/user";
  * Вызывается при старте.
  */
 
-const SEED_VERSION = 4; // увеличивай при изменении демо-данных
+const SEED_VERSION = 5; // увеличивай при изменении демо-данных
+
+const VIP_PACKAGES = [
+  {
+    id: "vip_starter",
+    name: "VIP Старт",
+    description: "Идеальный старт для реферера. Повышенный бонус и быстрый вывод.",
+    priceCents: 3000,
+    referralBonusPercent: 15,
+    dailyTasksBonus: 5,
+    minWithdrawalCents: 800,
+    color: "#10b981",
+    icon: "🥉",
+    sortOrder: 1,
+  },
+  {
+    id: "vip_bronze",
+    name: "VIP Бронза",
+    description: "Больше бонусов с рефералов и увеличенный дневной лимит заданий.",
+    priceCents: 4000,
+    referralBonusPercent: 20,
+    dailyTasksBonus: 10,
+    minWithdrawalCents: 700,
+    color: "#cd7f32",
+    icon: "🥈",
+    sortOrder: 2,
+  },
+  {
+    id: "vip_silver",
+    name: "VIP Серебро",
+    description: "Средний уровень — хороший бонус и комфортный вывод от $5.",
+    priceCents: 5000,
+    referralBonusPercent: 25,
+    dailyTasksBonus: 15,
+    minWithdrawalCents: 500,
+    color: "#94a3b8",
+    icon: "🥈",
+    sortOrder: 3,
+  },
+  {
+    id: "vip_gold",
+    name: "VIP Золото",
+    description: "Высокий бонус с рефералов, минимум к выводу всего $3, эксклюзивные задания.",
+    priceCents: 7000,
+    referralBonusPercent: 30,
+    dailyTasksBonus: 25,
+    minWithdrawalCents: 300,
+    color: "#fbbf24",
+    icon: "🥇",
+    sortOrder: 4,
+  },
+  {
+    id: "vip_platinum",
+    name: "VIP Платина",
+    description: "Максимальные привилегии: 40% с рефералов, безлимит на задания, вывод от $1.",
+    priceCents: 10000,
+    referralBonusPercent: 40,
+    dailyTasksBonus: 999,
+    minWithdrawalCents: 100,
+    color: "#a855f7",
+    icon: "💎",
+    sortOrder: 5,
+  },
+];
 
 const DEMO_USERS = [
   { username: "telegram_promo", email: "tg@demo.com", password: "demo123" },
@@ -182,6 +245,26 @@ export function seedDemoData() {
   }
 
   console.log(`✅ Seeded ${ADVERTISERS.length} advertisers and ${taskCount} tasks`);
+
+  // VIP-пакеты
+  for (const vip of VIP_PACKAGES) {
+    const existing = db.prepare("SELECT id FROM vip_packages WHERE id = ?").get(vip.id);
+    if (!existing) {
+      db.prepare(`
+        INSERT INTO vip_packages (id, name, description, price_cents, referral_bonus_percent, daily_tasks_bonus, min_withdrawal_cents, color, icon, sort_order, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(vip.id, vip.name, vip.description, vip.priceCents, vip.referralBonusPercent, vip.dailyTasksBonus, vip.minWithdrawalCents, vip.color, vip.icon, vip.sortOrder, Math.floor(Date.now() / 1000));
+    }
+  }
+
+  // Настройка крана-букса
+  const faucetSettings = db.prepare("SELECT id FROM faucet_settings WHERE id = 'main'").get();
+  if (!faucetSettings) {
+    db.prepare(`
+      INSERT INTO faucet_settings (id, min_amount_cents, max_amount_cents, cooldown_seconds, is_active, created_at)
+      VALUES ('main', 1, 100, 3600, 1, ?)
+    `).run(Math.floor(Date.now() / 1000));
+  }
 
   // Сохраняем версию сида
   db.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('seed_version', ?)").run(String(SEED_VERSION));

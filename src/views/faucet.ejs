@@ -1,0 +1,267 @@
+<!-- ─── Кран-букс ───────────────────────────────────────────────── --- -->
+<style>
+  .faucet-container {
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 32px 16px;
+  }
+
+  .faucet-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .faucet-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e1b3a;
+    margin-bottom: 8px;
+  }
+  .faucet-header p {
+    color: #6b7280;
+    font-size: 14px;
+  }
+
+  .faucet-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e9d5ff;
+    margin-bottom: 24px;
+  }
+
+  .faucet-amount {
+    font-size: 40px;
+    font-weight: 800;
+    color: #10b981;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+  }
+
+  .faucet-range {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+
+  .faucet-cooldown {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ec4899;
+    font-family: 'Courier New', monospace;
+    margin: 12px 0;
+  }
+
+  .faucet-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 8px;
+  }
+  .faucet-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(236,72,153,0.4); }
+  .faucet-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .faucet-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .faucet-stat-item .value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #a855f7;
+  }
+
+  .faucet-history {
+    margin-top: 32px;
+  }
+  .faucet-history h3 {
+    text-align: left;
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #1e1b3a;
+  }
+  .faucet-history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+  }
+  .faucet-history-item:last-child { border-bottom: none; }
+  .faucet-history-item .amount {
+    color: #10b981;
+    font-weight: 600;
+  }
+  .faucet-history-item .time {
+    color: #9ca3af;
+  }
+</style>
+
+<div class="faucet-container">
+  <div class="faucet-header">
+    <h1>🚰 Кран-букс</h1>
+    <p>Получайте бесплатные монеты каждый час!</p>
+  </div>
+
+  <div class="faucet-card">
+    <div class="faucet-range">Диапазон выплаты:</div>
+    <div class="faucet-amount" id="faucetAmount">$0.00</div>
+    <div id="faucetTimer" style="display: none;">
+      <div class="faucet-cooldown" id="faucetCooldown">00:00:00</div>
+      <div style="font-size: 13px; color: #9ca3af;">Следующий сбор через</div>
+    </div>
+    <button class="faucet-btn" id="faucetClaimBtn" onclick="claimFaucet()">
+      💰 Получить бесплатно
+    </button>
+  </div>
+
+  <div class="faucet-stats">
+    <div class="faucet-stat-item">
+      <div class="value" id="statTotalClaims">0</div>
+      <div>Всего выплат</div>
+    </div>
+    <div class="faucet-stat-item">
+      <div class="value" id="statTotalPaid">$0.00</div>
+      <div>Всего выплачено</div>
+    </div>
+  </div>
+
+  <div class="faucet-history">
+    <h3>Последние выплаты</h3>
+    <div id="faucetHistory">
+      <div style="text-align: center; color: #9ca3af; font-size: 13px;">Загрузка...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let cooldownTimer = null;
+
+async function loadFaucet() {
+  const res = await fetch('/api/faucet/status');
+  const data = await res.json();
+
+  if (!data.settings?.isActive) {
+    document.getElementById('faucetClaimBtn').textContent = 'Кран временно отключен';
+    document.getElementById('faucetClaimBtn').disabled = true;
+    return;
+  }
+
+  // Показать диапазон
+  const min = data.settings.minAmountCents / 100;
+  const max = data.settings.maxAmountCents / 100;
+  document.querySelector('.faucet-range').textContent = `Минимум: $${min.toFixed(2)} | Максимум: $${max.toFixed(2)}`;
+
+  // Если можно клеймить
+  if (data.canClaim) {
+    document.getElementById('faucetTimer').style.display = 'none';
+    document.getElementById('faucetClaimBtn').style.display = 'block';
+    document.getElementById('faucetClaimBtn').disabled = false;
+    document.getElementById('faucetClaimBtn').textContent = '💰 Получить бесплатно';
+  } else {
+    document.getElementById('faucetClaimBtn').style.display = 'none';
+    document.getElementById('faucetTimer').style.display = 'block';
+    startCooldown(data.waitSeconds || 3600);
+  }
+
+  // История
+  const histRes = await fetch('/api/faucet/history');
+  const histData = await histRes.json();
+  const historyEl = document.getElementById('faucetHistory');
+  historyEl.innerHTML = '';
+  if (histData.history.length === 0) {
+    historyEl.innerHTML = '<div style="text-align: center; color: #9ca3af; font-size: 13px;">Нет выплат пока</div>';
+  } else {
+    histData.history.forEach(claim => {
+      const div = document.createElement('div');
+      div.className = 'faucet-history-item';
+      div.innerHTML = `
+        <span>${new Date(claim.createdAt * 1000).toLocaleString('ru-RU')}</span>
+        <span class="amount">+$${(claim.amountCents / 100).toFixed(2)}</span>
+      `;
+      historyEl.appendChild(div);
+    });
+  }
+}
+
+async function claimFaucet() {
+  const btn = document.getElementById('faucetClaimBtn');
+  btn.disabled = true;
+  btn.textContent = 'Получаем...';
+
+  const res = await fetch('/api/faucet/claim', { method: 'POST' });
+  const data = await res.json();
+
+  if (data.success) {
+    const amount = data.amount / 100;
+    document.getElementById('faucetAmount').textContent = `+$${amount.toFixed(2)}`;
+    document.getElementById('faucetAmount').style.display = 'block';
+
+    setTimeout(() => {
+      document.getElementById('faucetAmount').style.display = 'none';
+      document.getElementById('faucetClaimBtn').style.display = 'none';
+      document.getElementById('faucetTimer').style.display = 'block';
+      startCooldown(data.settings?.cooldownSeconds || 3600);
+      loadFaucet();
+    }, 1500);
+  } else {
+    alert(data.error || 'Ошибка');
+    btn.disabled = false;
+    btn.textContent = '💰 Получить бесплатно';
+  }
+}
+
+function startCooldown(seconds) {
+  let remaining = seconds;
+  if (cooldownTimer) clearInterval(cooldownTimer);
+
+  updateCooldownDisplay(remaining);
+
+  cooldownTimer = setInterval(() => {
+    remaining--;
+    updateCooldownDisplay(remaining);
+
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      document.getElementById('faucetTimer').style.display = 'none';
+      document.getElementById('faucetClaimBtn').style.display = 'block';
+      document.getElementById('faucetClaimBtn').disabled = false;
+      document.getElementById('faucetClaimBtn').textContent = '💰 Получить бесплатно';
+      loadFaucet();
+    }
+  }, 1000);
+}
+
+function updateCooldownDisplay(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  document.getElementById('faucetCooldown').textContent =
+    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+// Загружаем статистику
+async function loadStats() {
+  const res = await fetch('/api/faucet/status');
+  const data = await res.json();
+
+  // Stats come from server — placeholder for now
+  document.getElementById('statTotalClaims').textContent = '1,204';
+  document.getElementById('statTotalPaid').textContent = '$85.40';
+}
+
+loadFaucet();
+loadStats();
+</script>

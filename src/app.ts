@@ -12,7 +12,9 @@ import advertiserRoutes from "./routes/advertiser";
 import referralPackRoutes from "./routes/referral-packs";
 import vipAdRoutes from "./routes/vip-ads";
 import paymentRoutes from "./routes/payments";
+import vipRoutes from "./routes/vip";
 import { seedDemoData } from "./scripts/seed";
+import { VipModel, FaucetModel } from "./models/vip";
 
 const app = express();
 
@@ -39,8 +41,9 @@ app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/advertiser", advertiserRoutes);
 app.use("/api/referral-packs", referralPackRoutes);
-app.use("/api/vip", vipAdRoutes);
+app.use("/api/vip", vipRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/faucet", vipRoutes);
 
 // ── Page Routes ──────────────────────────────────────────────
 
@@ -121,6 +124,18 @@ app.get("/advertiser/referrals", authOptional, (req, res) => {
 app.get("/advertiser/vip", authOptional, (req, res) => {
   if (!req.user) return res.redirect("/login");
   res.render("advertiser-vip", { title: "VIP-реклама", user: req.user });
+});
+
+// Страница VIP
+app.get("/vip", authOptional, (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  res.render("vip", { title: "VIP-пакеты", user: req.user });
+});
+
+// Страница крана
+app.get("/faucet", authOptional, (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  res.render("faucet", { title: "Кран-букс", user: req.user });
 });
 
 // ── Error handler ─────────────────────────────────────────────

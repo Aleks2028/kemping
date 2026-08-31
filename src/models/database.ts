@@ -216,6 +216,51 @@ CREATE TABLE IF NOT EXISTS crypto_deposits (
   created_at INTEGER NOT NULL,
   FOREIGN KEY (advertiser_id) REFERENCES advertisers(id)
 );
+
+CREATE TABLE IF NOT EXISTS vip_packages (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  price_cents INTEGER NOT NULL,
+  referral_bonus_percent INTEGER NOT NULL,
+  daily_tasks_bonus INTEGER DEFAULT 0,
+  min_withdrawal_cents INTEGER,
+  color TEXT DEFAULT '#ec4899',
+  icon TEXT DEFAULT '⭐',
+  sort_order INTEGER DEFAULT 0,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS vip_purchases (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  package_id TEXT NOT NULL,
+  price_cents INTEGER NOT NULL,
+  status TEXT DEFAULT 'active',
+  started_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (package_id) REFERENCES vip_packages(id)
+);
+
+CREATE TABLE IF NOT EXISTS faucet_claims (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  ip_address TEXT,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS faucet_settings (
+  id TEXT PRIMARY KEY,
+  min_amount_cents INTEGER DEFAULT 1,
+  max_amount_cents INTEGER DEFAULT 100,
+  cooldown_seconds INTEGER DEFAULT 3600,
+  is_active INTEGER DEFAULT 1,
+  created_at INTEGER NOT NULL
+);
 `);
 
 export function closeDb() {
