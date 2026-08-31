@@ -164,6 +164,14 @@ export const VipModel = {
     ).run(id, advertiserId, data.title, data.link, data.impressions, data.priceCents, now);
     return { id, advertiserId, impressions: data.impressions };
   },
+
+  isVipAdvertiser(advertiserId: string): boolean {
+    const now = Math.floor(Date.now() / 1000);
+    const row = db.prepare(
+      "SELECT id FROM vip_badges WHERE advertiser_id = ? AND status = 'active' AND end_date > ? LIMIT 1"
+    ).get(advertiserId, now);
+    return !!row;
+  },
 };
 
 export const FaucetModel = {
