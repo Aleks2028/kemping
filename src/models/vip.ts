@@ -194,6 +194,16 @@ export const VipModel = {
     ).run(id, advertiserId, data.title, data.text, data.link, data.color, data.pricePerDayCents, data.days, now, endDate, now);
     return { id, advertiserId, days: data.days, endDate };
   },
+
+  listActiveBanners(): any[] {
+    const now = Math.floor(Date.now() / 1000);
+    const rows = db.prepare(
+      "SELECT vb.*, a.company_name FROM vip_banners vb " +
+      "JOIN advertisers a ON a.id = vb.advertiser_id " +
+      "WHERE vb.status = 'active' AND vb.end_date > ? ORDER BY vb.created_at DESC"
+    ).all(now) as any[];
+    return rows;
+  },
 };
 
 export const FaucetModel = {
