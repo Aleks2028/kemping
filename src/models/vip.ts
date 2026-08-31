@@ -183,6 +183,17 @@ export const VipModel = {
     ).run(id, taskId, advertiserId, data.pricePerDayCents, data.days, now, endDate, now);
     return { id, taskId, days: data.days, endDate };
   },
+
+  createBanner(advertiserId: string, data: { title: string; text: string; link: string; color: string; pricePerDayCents: number; days: number }): any {
+    const now = Math.floor(Date.now() / 1000);
+    const endDate = now + data.days * 86400;
+    const id = uuidv4();
+    db.prepare(
+      "INSERT INTO vip_banners (id, advertiser_id, title, text, link, color, price_per_day_cents, days, start_date, end_date, status, created_at) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)"
+    ).run(id, advertiserId, data.title, data.text, data.link, data.color, data.pricePerDayCents, data.days, now, endDate, now);
+    return { id, advertiserId, days: data.days, endDate };
+  },
 };
 
 export const FaucetModel = {
