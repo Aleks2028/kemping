@@ -1,0 +1,277 @@
+<style>
+  .urls-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .urls-header {
+    margin-bottom: 24px;
+  }
+  .urls-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e1b3a;
+    margin-bottom: 8px;
+  }
+  .urls-header p {
+    color: #6b7280;
+    font-size: 14px;
+  }
+
+  .urls-form {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e9d5ff;
+    margin-bottom: 24px;
+  }
+
+  .urls-form label {
+    display: block;
+    margin-bottom: 6px;
+    color: #1e1b3a;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .urls-form input {
+    width: 100%;
+    border: 1px solid #e9d5ff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    background: #faf5ff;
+    color: #1e1b3a;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+  }
+  .urls-form input:focus {
+    border-color: #a855f7;
+    background: white;
+  }
+
+  .urls-form button {
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .urls-form button:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(236,72,153,0.4); }
+
+  .urls-list {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e9d5ff;
+    overflow: hidden;
+  }
+
+  .urls-item {
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .urls-item:last-child { border-bottom: none; }
+
+  .urls-item-code {
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .urls-item-url {
+    flex: 1;
+    min-width: 0;
+  }
+  .urls-item-url .short {
+    color: #a855f7;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .urls-item-url .target {
+    color: #6b7280;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .urls-item-clicks {
+    color: #6b7280;
+    font-size: 13px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .urls-item-clicks .num { font-size: 18px; font-weight: 700; color: #1e1b3a; }
+
+  .urls-item-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .urls-item-actions button {
+    background: white;
+    border: 1px solid #e9d5ff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #a855f7;
+    transition: all 0.2s;
+  }
+  .urls-item-actions button:hover {
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    color: white;
+    border-color: transparent;
+  }
+  .urls-item-actions button.delete:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  .empty-state {
+    padding: 48px 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+
+  .urls-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .urls-success.show { display: block; }
+</style>
+
+<div class="urls-container">
+  <div class="urls-header">
+    <h1>🔗 Короткие ссылки</h1>
+    <p>Превращайте длинные URL в короткие для соцсетей и мессенджеров</p>
+  </div>
+
+  <div class="urls-success" id="urlsSuccess">
+    <strong>Готово!</strong> Короткая ссылка создана: <span id="newLink"></span>
+  </div>
+
+  <div class="urls-form">
+    <label>Полная ссылка</label>
+    <input type="url" id="targetUrl" placeholder="https://пример.ру/очень-длинная-страница/с-параметрами" />
+
+    <label>Свой короткий код (необязательно)</label>
+    <input type="text" id="customCode" placeholder="оставьте пустым для случайного" maxlength="20" />
+
+    <button onclick="createShortUrl()">Сократить ссылку</button>
+  </div>
+
+  <div class="urls-list" id="urlsList">
+    <div class="empty-state">Загрузка...</div>
+  </div>
+</div>
+
+<script>
+async function loadLinks() {
+  const res = await fetch('/api/urls/my');
+  const data = await res.json();
+  const list = document.getElementById('urlsList');
+  list.innerHTML = '';
+
+  if (data.links.length === 0) {
+    list.innerHTML = '<div class="empty-state">У вас пока нет коротких ссылок</div>';
+    return;
+  }
+
+  const host = window.location.host;
+  data.links.forEach(link => {
+    const div = document.createElement('div');
+    div.className = 'urls-item';
+    div.innerHTML = `
+      <div class="urls-item-code">${link.code}</div>
+      <div class="urls-item-url">
+        <div class="short">https://${host}/${link.code}</div>
+        <div class="target" title="${link.target_url}">→ ${link.target_url}</div>
+      </div>
+      <div class="urls-item-clicks">
+        <div class="num">${link.clicks}</div>
+        <div>кликов</div>
+      </div>
+      <div class="urls-item-actions">
+        <button onclick="copyLink('https://${host}/${link.code}')">📋 Копировать</button>
+        <button class="delete" onclick="deleteLink('${link.code}')">🗑️</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+async function createShortUrl() {
+  const targetUrl = document.getElementById('targetUrl').value.trim();
+  const customCode = document.getElementById('customCode').value.trim();
+
+  if (!targetUrl) {
+    alert('Укажите ссылку');
+    return;
+  }
+
+  const res = await fetch('/api/urls/shorten', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ targetUrl, code: customCode || undefined })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    document.getElementById('newLink').textContent = data.shortUrl;
+    document.getElementById('urlsSuccess').classList.add('show');
+    document.getElementById('targetUrl').value = '';
+    document.getElementById('customCode').value = '';
+    loadLinks();
+    setTimeout(() => {
+      document.getElementById('urlsSuccess').classList.remove('show');
+    }, 5000);
+  } else {
+    alert('Ошибка: ' + (data.error || 'Не удалось создать ссылку'));
+  }
+}
+
+async function deleteLink(code) {
+  if (!confirm('Удалить ссылку ' + code + '?')) return;
+
+  const res = await fetch('/api/urls/' + code, { method: 'DELETE' });
+  const data = await res.json();
+
+  if (data.success) {
+    loadLinks();
+  } else {
+    alert('Ошибка: ' + (data.error || 'Не удалось удалить'));
+  }
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Ссылка скопирована: ' + url);
+  }).catch(() => {
+    prompt('Скопируйте вручную:', url);
+  });
+}
+
+loadLinks();
+</script>

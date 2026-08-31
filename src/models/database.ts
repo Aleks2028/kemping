@@ -261,6 +261,17 @@ CREATE TABLE IF NOT EXISTS faucet_settings (
   is_active INTEGER DEFAULT 1,
   created_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS url_redirects (
+  id TEXT PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  target_url TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  clicks INTEGER DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER,
+  FOREIGN KEY (created_by) REFERENCES users(id)
+);
 `);
 
 export function closeDb() {

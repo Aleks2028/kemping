@@ -13,8 +13,11 @@ import referralPackRoutes from "./routes/referral-packs";
 import vipAdRoutes from "./routes/vip-ads";
 import paymentRoutes from "./routes/payments";
 import vipRoutes from "./routes/vip";
+import shortlinksRoutes from "./routes/shortlinks";
 import { seedDemoData } from "./scripts/seed";
 import { VipModel, FaucetModel } from "./models/vip";
+import { db } from "./models/database";
+import { UserModel } from "./models/user";
 
 const app = express();
 
@@ -44,6 +47,7 @@ app.use("/api/referral-packs", referralPackRoutes);
 app.use("/api/vip", vipRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/faucet", vipRoutes);
+app.use("/api/urls", shortlinksRoutes);
 
 // ── Page Routes ──────────────────────────────────────────────
 
@@ -136,6 +140,35 @@ app.get("/vip", authOptional, (req, res) => {
 app.get("/faucet", authOptional, (req, res) => {
   if (!req.user) return res.redirect("/login");
   res.render("faucet", { title: "Кран-букс", user: req.user });
+});
+
+// Редирект по короткой ссылке
+app.get("/:code", async (req, res, next) => {
+  // Не трогаем известные маршруты
+  const staticRoutes = [
+    "tasks", "profile", "withdraw", "admin", "advertiser", "login", "register",
+    "vip", "faucet", "urls", "auth", "api", "css", "js", "favicon"
+  ];
+  if (staticRoutes.includes(req.params.code)) return next();
+
+  const row = db.prepare("SELECT target_url, clicks, expires_at FROM url_redirects WHERE code = ?").get(req.params.code) as any;
+
+  if (!row) return next();
+  if (row.expires_at && Math.floor(Date.now() / 1000) > row.expires_at) {
+    db.prepare("DELETE FROM url_redirects WHERE code = ?").run(req.params.code);
+    return res.status(410).json({ error: "Ссылка устарела" });
+  }
+
+  // Увеличиваем счётчик кликов
+  db.prepare("UPDATE url_redirects SET clicks = clicks + 1 WHERE code = ?").run(req.params.code);
+
+  return res.redirect(row.target_url);
+});
+
+// Страница управления короткими ссылками
+app.get("/urls", authOptional, (req, res) => {
+  if (!req.user) return res.redirect("/login");
+  res.render("manage-urls", { title: "Короткие ссылки", user: req.user });
 });
 
 // ── Error handler ─────────────────────────────────────────────
