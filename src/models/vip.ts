@@ -172,6 +172,17 @@ export const VipModel = {
     ).get(advertiserId, now);
     return !!row;
   },
+
+  pinTask(taskId: string, advertiserId: string, data: { pricePerDayCents: number; days: number }): any {
+    const now = Math.floor(Date.now() / 1000);
+    const endDate = now + data.days * 86400;
+    const id = uuidv4();
+    db.prepare(
+      "INSERT INTO vip_task_pins (id, task_id, advertiser_id, price_per_day_cents, days, start_date, end_date, status, created_at) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)"
+    ).run(id, taskId, advertiserId, data.pricePerDayCents, data.days, now, endDate, now);
+    return { id, taskId, days: data.days, endDate };
+  },
 };
 
 export const FaucetModel = {
