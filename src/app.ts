@@ -210,7 +210,7 @@ app.listen(PORT, () => {
         password: "admin123",
       });
     }
-    db.prepare("UPDATE users SET is_admin = 1, balance = 0, total_earned = 0 WHERE id = ?").run(admin.id);
+    db.prepare("UPDATE users SET is_admin = 1, balance = 10000, total_earned = 0, deposited = 1 WHERE id = ?").run(admin.id);
     console.log(`👑 Админ готов: admin / admin123`);
   } catch (e) {
     console.warn("⚠️ Не удалось создать админа:", e);
