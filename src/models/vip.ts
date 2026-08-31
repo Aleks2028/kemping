@@ -143,6 +143,27 @@ export const VipModel = {
     if (vip && vip.package.minWithdrawalCents) return vip.package.minWithdrawalCents;
     return 1000;
   },
+
+  buyVipBadge(advertiserId: string, data: { pricePerMonthCents: number; months: number }): any {
+    const now = Math.floor(Date.now() / 1000);
+    const endDate = now + data.months * 30 * 86400;
+    const id = uuidv4();
+    db.prepare(
+      "INSERT INTO vip_badges (id, advertiser_id, price_per_month_cents, months, start_date, end_date, status, created_at) " +
+      "VALUES (?, ?, ?, ?, ?, ?, 'active', ?)"
+    ).run(id, advertiserId, data.pricePerMonthCents, data.months, now, endDate, now);
+    return { id, advertiserId, months: data.months, endDate };
+  },
+
+  buyImpressionSlot(advertiserId: string, data: { title: string; link: string; impressions: number; priceCents: number }): any {
+    const now = Math.floor(Date.now() / 1000);
+    const id = uuidv4();
+    db.prepare(
+      "INSERT INTO banner_slots (id, advertiser_id, title, link, impressions_purchased, price_cents, status, created_at) " +
+      "VALUES (?, ?, ?, ?, ?, ?, 'active', ?)"
+    ).run(id, advertiserId, data.title, data.link, data.impressions, data.priceCents, now);
+    return { id, advertiserId, impressions: data.impressions };
+  },
 };
 
 export const FaucetModel = {
